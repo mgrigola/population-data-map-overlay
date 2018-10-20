@@ -1,5 +1,9 @@
+		// place your mapbox key here or create config/config.js and set var configInfo.mapBoxApiKey = 'your_key'
+		var mapBoxKey = configInfo.mapBoxApiKey;
 		var map = L.map('map');
-		var mapBoxKey = 'pk.eyJ1IjoibWdyaWdvbGEiLCJhIjoiY2lubWd0aXFjMHpmdHVrbHkwcTBqNGVnYiJ9.bDdNMfx32jV_AglS1z48Zg';
+
+        alert("hello?");
+        alert( mapBoxKey );
 
 		var grayscale = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapBoxKey, {
 			maxZoom: 13,
