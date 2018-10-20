@@ -42,7 +42,7 @@
 		
 		function clearInfo(e) {
 			if (hasInfo) {
-				info.removeFrom(map);
+				info.remove(map);
 				hasInfo = false;
 			}
 		}
