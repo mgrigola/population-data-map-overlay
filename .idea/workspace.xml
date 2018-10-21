@@ -1,7 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cd60834a-78de-48d8-90b4-8108a739df47" name="Default" comment="" />
+    <list default="true" id="cd60834a-78de-48d8-90b4-8108a739df47" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/web/config/keys.js" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/data/ACS_14_5YR_S0101_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.cpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.dbf" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.prj" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.shp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.shp.ea.iso.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.shp.iso.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.shp.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/cb_2015_55_cousub_500k.shx" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/WI_County/plotPoly.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.cpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.dbf" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.prj" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.shp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.shp.ea.iso.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.shp.iso.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.shp.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/state/cb_2015_us_state_5m.shx" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S0101_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S0101_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S0802_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S0802_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S1603_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S1603_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S1901_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S1901_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2301_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2301_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2405_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2405_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2501_metadata.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/values/ACS_14_5YR_S2501_with_ann.csv" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/python/geoJsonDataGen.py" afterPath="$PROJECT_DIR$/python/geoJsonDataGen.py" />
+      <change beforePath="$PROJECT_DIR$/python/googleGeocodeKey.md" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/python/randomAddresses.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/python/readDataACS.py" afterPath="$PROJECT_DIR$/python/readDataACS.py" />
+      <change beforePath="$PROJECT_DIR$/web/Population_Density4.html" afterPath="$PROJECT_DIR$/web/Population_Density4.html" />
+      <change beforePath="$PROJECT_DIR$/web/cb_2015_us_zcta510_500k.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/config/config.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/data/cb_2015_us_zcta510_500k.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/data/zipIncomeVals.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/data/zipIncomeVals2.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/data/zipsWiDaneCounty.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/incomeByZipCodeWI.html" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/incomeByZipCodeWI.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/leaflet.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/leaflet.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/script/Population_Density4.js" afterPath="$PROJECT_DIR$/web/script/Population_Density4.js" />
+      <change beforePath="$PROJECT_DIR$/web/zipIncomeVals.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/zipIncomeVals2.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/web/zipsWiDaneCounty.json" afterPath="" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -9,33 +63,124 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DockManager">
+    <window id="4">
+      <content type="file-editors">
+        <state>
+          <leaf>
+            <file leaf-file-name="leaflet.css" pinned="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/web/leaflet/leaflet.css">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state relative-caret-position="-679">
+                    <caret line="19" column="6" lean-forward="false" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="6" />
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+          </leaf>
+        </state>
+      </content>
+    </window>
+    <window id="2">
+      <content type="file-editors">
+        <state>
+          <splitter split-orientation="horizontal" split-proportion="0.5">
+            <split-first>
+              <leaf>
+                <file leaf-file-name="keys.js" pinned="false" current-in-tab="false">
+                  <entry file="file://$PROJECT_DIR$/web/config/keys.js">
+                    <provider selected="true" editor-type-id="text-editor">
+                      <state relative-caret-position="51">
+                        <caret line="3" column="2" lean-forward="false" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
+                        <folding />
+                      </state>
+                    </provider>
+                  </entry>
+                </file>
+                <file leaf-file-name="Population_Density4.html" pinned="false" current-in-tab="true">
+                  <entry file="file://$PROJECT_DIR$/../temp/population-data-map-overlay/web/Population_Density4.html">
+                    <provider selected="true" editor-type-id="text-editor">
+                      <state relative-caret-position="0">
+                        <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                        <folding />
+                      </state>
+                    </provider>
+                  </entry>
+                </file>
+              </leaf>
+            </split-first>
+            <split-second>
+              <leaf>
+                <file leaf-file-name="Population_Density4.js" pinned="false" current-in-tab="true">
+                  <entry file="file://$PROJECT_DIR$/../temp/population-data-map-overlay/web/Population_Density4.js">
+                    <provider selected="true" editor-type-id="text-editor">
+                      <state relative-caret-position="308">
+                        <caret line="80" column="26" lean-forward="false" selection-start-line="80" selection-start-column="17" selection-end-line="80" selection-end-column="26" />
+                        <folding />
+                      </state>
+                    </provider>
+                  </entry>
+                </file>
+              </leaf>
+            </split-second>
+          </splitter>
+        </state>
+      </content>
+    </window>
+  </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="geoJsonDataGen.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python/geoJsonDataGen.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="15" column="10" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="53" />
-              <folding>
-                <element signature="e#436#471#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="shp2gjson.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/python/shp2gjson.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.6078665">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file leaf-file-name="Population_Density4.js" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/web/script/Population_Density4.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="646">
+                  <caret line="83" column="136" lean-forward="false" selection-start-line="83" selection-start-column="136" selection-end-line="83" selection-end-column="136" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file leaf-file-name="Population_Density4.html" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/web/Population_Density4.html">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="199">
+                  <caret line="24" column="29" lean-forward="false" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>daneCountyZips</find>
+      <find>onEachFeature</find>
+      <find>hasInfo</find>
+      <find>geojson</find>
+      <find>getColor</find>
+      <find>high</find>
+      <find>stateElement</find>
+      <find>reset_highlight</find>
+      <find>layers</find>
+      <find>removeFro</find>
+      <find>highlight_feature</find>
+      <find>reset</find>
+      <find>regionElement</find>
+      <find>pow</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -43,14 +188,21 @@
         <option value="$PROJECT_DIR$/python/geoJsonDataGen.py" />
         <option value="$PROJECT_DIR$/data/WI_County/plotPoly.py" />
         <option value="$PROJECT_DIR$/python/shp2gjson.py" />
+        <option value="$PROJECT_DIR$/python/readDataACS.py" />
+        <option value="$PROJECT_DIR$/web/Population_Density4.js" />
+        <option value="$PROJECT_DIR$/web/config/config.js" />
+        <option value="$PROJECT_DIR$/../temp/population-data-map-overlay/web/Population_Density4.js" />
+        <option value="$PROJECT_DIR$/web/config/keys.js" />
+        <option value="$PROJECT_DIR$/web/Population_Density4.html" />
+        <option value="$PROJECT_DIR$/web/script/Population_Density4.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-1928" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
-    <option name="height" value="1096" />
+    <option name="height" value="1066" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -68,33 +220,51 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
-              <item name="population data map overlay" type="b2602c69:ProjectViewProjectNode" />
-              <item name="population data map overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="population data map overlay" type="b2602c69:ProjectViewProjectNode" />
-              <item name="population data map overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
               <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="population data map overlay" type="b2602c69:ProjectViewProjectNode" />
-              <item name="population data map overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
               <item name="python" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="population data map overlay" type="b2602c69:ProjectViewProjectNode" />
-              <item name="population data map overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
               <item name="web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="config" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="leaflet" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="population-data-map-overlay" type="b2602c69:ProjectViewProjectNode" />
+              <item name="population-data-map-overlay" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="script" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -113,6 +283,11 @@
   <component name="PyDebuggerOptionsProvider">
     <option name="mySupportQtDebugging" value="false" />
     <option name="myPyQtBackend" value="PyQt5" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\m\Documents\GitHub\population-data-map-overlay\web\script" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -168,25 +343,25 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12604167" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -200,21 +375,9 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/python/geoJsonDataGen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
+        <state relative-caret-position="238">
           <caret line="15" column="10" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="53" />
-          <folding>
-            <element signature="e#436#471#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/WI_County/plotPoly.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="66" lean-forward="false" selection-start-line="17" selection-start-column="66" selection-end-line="17" selection-end-column="66" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -223,8 +386,127 @@
         <state relative-caret-position="204">
           <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/geoJsonDataGen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="15" column="10" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/shp2gjson.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/shp2gjson.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="29" column="64" lean-forward="false" selection-start-line="29" selection-start-column="64" selection-end-line="29" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/readDataACS.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="30" column="28" lean-forward="false" selection-start-line="30" selection-start-column="28" selection-end-line="30" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/incomeByZipCodeWI.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="27" column="0" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+          <caret line="28" column="17" lean-forward="false" selection-start-line="28" selection-start-column="17" selection-end-line="28" selection-end-column="17" />
+          <caret line="29" column="36" lean-forward="false" selection-start-line="29" selection-start-column="36" selection-end-line="29" selection-end-column="36" />
+          <caret line="30" column="32" lean-forward="false" selection-start-line="30" selection-start-column="32" selection-end-line="30" selection-end-column="32" />
+          <caret line="31" column="36" lean-forward="false" selection-start-line="31" selection-start-column="36" selection-end-line="31" selection-end-column="36" />
+          <caret line="32" column="9" lean-forward="false" selection-start-line="32" selection-start-column="9" selection-end-line="32" selection-end-column="9" />
+          <caret line="33" column="19" lean-forward="false" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
+          <caret line="34" column="36" lean-forward="false" selection-start-line="34" selection-start-column="36" selection-end-line="34" selection-end-column="36" />
+          <caret line="35" column="36" lean-forward="false" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+          <caret line="36" column="40" lean-forward="false" selection-start-line="36" selection-start-column="40" selection-end-line="36" selection-end-column="40" />
+          <caret line="37" column="30" lean-forward="false" selection-start-line="37" selection-start-column="30" selection-end-line="37" selection-end-column="30" />
+          <caret line="38" column="25" lean-forward="false" selection-start-line="38" selection-start-column="25" selection-end-line="38" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/incomeByZipCodeWI.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1099">
+          <caret line="169" column="23" lean-forward="false" selection-start-line="169" selection-start-column="23" selection-end-line="169" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../temp/population-data-map-overlay/web/Population_Density4.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../temp/population-data-map-overlay/web/Population_Density4.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="80" column="26" lean-forward="false" selection-start-line="80" selection-start-column="17" selection-end-line="80" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/geoJsonDataGen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="18" column="33" lean-forward="true" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/config/keys.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="2" lean-forward="false" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/leaflet/leaflet.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-679">
+          <caret line="19" column="6" lean-forward="false" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/Population_Density4.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="24" column="29" lean-forward="false" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/script/Population_Density4.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="83" column="136" lean-forward="false" selection-start-line="83" selection-start-column="136" selection-end-line="83" selection-end-column="136" />
+          <folding />
         </state>
       </provider>
     </entry>

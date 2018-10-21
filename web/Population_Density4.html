@@ -5,7 +5,7 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<link rel="stylesheet" href="leaflet.css" />
+	<link rel="stylesheet" href="./leaflet/leaflet.css" />
 
 	<style>
 		#map {
@@ -42,11 +42,16 @@
 </head>
 
 <body>
+	<div> a little something above the map</div>
 	<div id="map"></div>
+	<div> more below the map the map</div>
 
-	<script src="leaflet.js"></script>
-	<script type="text/javascript" src="cb_2015_us_zcta510_500k.json"></script>
-	<script src="Population_Density4.js"></script>
-	
+	<script src="./leaflet/leaflet.js"></script>
+	<script src="./config/keys.js"></script>  						<!-- use your own mapbox key -->
+	<script src="./data/zipcodeShapeBounds.json"></script> 	<!-- zip code boundaries: geoJsonZipData -->
+	<script src="./data/incomeDistribByZipcode.json"></script>				<!-- info aggregated by zip code: zipIncomeVals -->
+	<script src="./script/Population_Density4.js"></script>
+	<!-- <script> alert("hello?"); </script> -->
+
 </body>
 </html>
