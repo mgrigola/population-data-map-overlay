@@ -6,6 +6,6 @@ see /web/main.html for the result
 
 
 NOTE:
-To use the map in main you'll need to provide your own mapbox key in /web/config/keys.js (see web/config/keys.txt)
+To use the map in main you'll need to provide your own mapbox key in /web/config/keys.js (copy+rename+edit web/config/keys.txt)
 
-to use the python random address util you'll need need to provide a googlemaps geocoding api key in /python/geocoding/googleGeocodeKey.py (see /python/geocoding/googleGeocodeKey.txt)
+to use the python random address util you'll need need to provide a googlemaps geocoding api key in /python/geocoding/googleGeocodeKey.py (copy+rename+edit /python/geocoding/googleGeocodeKey.txt)
