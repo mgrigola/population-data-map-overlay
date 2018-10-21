@@ -1,5 +1,6 @@
 #api keys
-*googleGeocodeKey.py
+python/geocoding/googleGeocodeKey.py
+web/config/keys.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
