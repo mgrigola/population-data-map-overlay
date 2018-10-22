@@ -1,0 +1,147 @@
+GEO.id,Id
+GEO.id2,Id2
+GEO.display-label,Geography
+HC01_EST_VC01,Total; Estimate; Total population 5 years and over
+HC01_MOE_VC01,Total; Margin of Error; Total population 5 years and over
+HC02_EST_VC01,People who speak only English at home; Estimate; Total population 5 years and over
+HC02_MOE_VC01,People who speak only English at home; Margin of Error; Total population 5 years and over
+HC03_EST_VC01,Percent distribution of people who speak a language other than English at home  - Total; Estimate; Total population 5 years and over
+HC03_MOE_VC01,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; Total population 5 years and over
+HC04_EST_VC01,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; Total population 5 years and over
+HC04_MOE_VC01,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; Total population 5 years and over
+HC01_EST_VC03,Total; Estimate; AGE - 5 to 17 years
+HC01_MOE_VC03,Total; Margin of Error; AGE - 5 to 17 years
+HC02_EST_VC03,People who speak only English at home; Estimate; AGE - 5 to 17 years
+HC02_MOE_VC03,People who speak only English at home; Margin of Error; AGE - 5 to 17 years
+HC03_EST_VC03,Percent distribution of people who speak a language other than English at home  - Total; Estimate; AGE - 5 to 17 years
+HC03_MOE_VC03,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; AGE - 5 to 17 years
+HC04_EST_VC03,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; AGE - 5 to 17 years
+HC04_MOE_VC03,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; AGE - 5 to 17 years
+HC01_EST_VC04,Total; Estimate; AGE - 18 to 64 years
+HC01_MOE_VC04,Total; Margin of Error; AGE - 18 to 64 years
+HC02_EST_VC04,People who speak only English at home; Estimate; AGE - 18 to 64 years
+HC02_MOE_VC04,People who speak only English at home; Margin of Error; AGE - 18 to 64 years
+HC03_EST_VC04,Percent distribution of people who speak a language other than English at home  - Total; Estimate; AGE - 18 to 64 years
+HC03_MOE_VC04,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; AGE - 18 to 64 years
+HC04_EST_VC04,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; AGE - 18 to 64 years
+HC04_MOE_VC04,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; AGE - 18 to 64 years
+HC01_EST_VC05,Total; Estimate; AGE - 65 years and over
+HC01_MOE_VC05,Total; Margin of Error; AGE - 65 years and over
+HC02_EST_VC05,People who speak only English at home; Estimate; AGE - 65 years and over
+HC02_MOE_VC05,People who speak only English at home; Margin of Error; AGE - 65 years and over
+HC03_EST_VC05,Percent distribution of people who speak a language other than English at home  - Total; Estimate; AGE - 65 years and over
+HC03_MOE_VC05,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; AGE - 65 years and over
+HC04_EST_VC05,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; AGE - 65 years and over
+HC04_MOE_VC05,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; AGE - 65 years and over
+HC01_EST_VC08,Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC01_MOE_VC08,Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC02_EST_VC08,People who speak only English at home; Estimate; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC02_MOE_VC08,People who speak only English at home; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC03_EST_VC08,Percent distribution of people who speak a language other than English at home  - Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC03_MOE_VC08,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC04_EST_VC08,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC04_MOE_VC08,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Native population 5 years and over
+HC01_EST_VC09,Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC01_MOE_VC09,Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC02_EST_VC09,People who speak only English at home; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC02_MOE_VC09,People who speak only English at home; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC03_EST_VC09,Percent distribution of people who speak a language other than English at home  - Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC03_MOE_VC09,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC04_EST_VC09,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC04_MOE_VC09,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over
+HC01_EST_VC10,Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC01_MOE_VC10,Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC02_EST_VC10,People who speak only English at home; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC02_MOE_VC10,People who speak only English at home; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC03_EST_VC10,Percent distribution of people who speak a language other than English at home  - Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC03_MOE_VC10,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC04_EST_VC10,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC04_MOE_VC10,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Naturalized U.S. citizen
+HC01_EST_VC11,Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC01_MOE_VC11,Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC02_EST_VC11,People who speak only English at home; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC02_MOE_VC11,People who speak only English at home; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC03_EST_VC11,Percent distribution of people who speak a language other than English at home  - Total; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC03_MOE_VC11,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC04_EST_VC11,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC04_MOE_VC11,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; NATIVITY AND CITIZENSHIP STATUS - Foreign-born population 5 years and over - Not a U.S. citizen
+HC01_EST_VC14,Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC01_MOE_VC14,Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC02_EST_VC14,People who speak only English at home; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC02_MOE_VC14,People who speak only English at home; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC03_EST_VC14,Percent distribution of people who speak a language other than English at home  - Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC03_MOE_VC14,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC04_EST_VC14,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC04_MOE_VC14,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined
+HC01_EST_VC15,Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC01_MOE_VC15,Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC02_EST_VC15,People who speak only English at home; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC02_MOE_VC15,People who speak only English at home; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC03_EST_VC15,Percent distribution of people who speak a language other than English at home  - Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC03_MOE_VC15,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC04_EST_VC15,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC04_MOE_VC15,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - Below poverty level
+HC01_EST_VC16,Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC01_MOE_VC16,Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC02_EST_VC16,People who speak only English at home; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC02_MOE_VC16,People who speak only English at home; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC03_EST_VC16,Percent distribution of people who speak a language other than English at home  - Total; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC03_MOE_VC16,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC04_EST_VC16,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC04_MOE_VC16,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; POVERTY STATUS IN THE PAST 12 MONTHS - Population 5 years and over for whom poverty status is determined - At or above poverty level
+HC01_EST_VC19,Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC01_MOE_VC19,Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC02_EST_VC19,People who speak only English at home; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC02_MOE_VC19,People who speak only English at home; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC03_EST_VC19,Percent distribution of people who speak a language other than English at home  - Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC03_MOE_VC19,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC04_EST_VC19,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC04_MOE_VC19,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over
+HC01_EST_VC20,Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC01_MOE_VC20,Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC02_EST_VC20,People who speak only English at home; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC02_MOE_VC20,People who speak only English at home; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC03_EST_VC20,Percent distribution of people who speak a language other than English at home  - Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC03_MOE_VC20,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC04_EST_VC20,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC04_MOE_VC20,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Less than high school graduate
+HC01_EST_VC21,Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC01_MOE_VC21,Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC02_EST_VC21,People who speak only English at home; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC02_MOE_VC21,People who speak only English at home; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC03_EST_VC21,Percent distribution of people who speak a language other than English at home  - Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC03_MOE_VC21,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC04_EST_VC21,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC04_MOE_VC21,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - High school graduate (includes equivalency)
+HC01_EST_VC22,Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC01_MOE_VC22,Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC02_EST_VC22,People who speak only English at home; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC02_MOE_VC22,People who speak only English at home; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC03_EST_VC22,Percent distribution of people who speak a language other than English at home  - Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC03_MOE_VC22,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC04_EST_VC22,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC04_MOE_VC22,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Some college or associate's degree
+HC01_EST_VC23,Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC01_MOE_VC23,Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC02_EST_VC23,People who speak only English at home; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC02_MOE_VC23,People who speak only English at home; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC03_EST_VC23,Percent distribution of people who speak a language other than English at home  - Total; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC03_MOE_VC23,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC04_EST_VC23,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC04_MOE_VC23,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; EDUCATIONAL ATTAINMENT - Population 25 years and over - Bachelor's degree or higher
+HC01_EST_VC26,Total; Estimate; PERCENT IMPUTED - Language status
+HC01_MOE_VC26,Total; Margin of Error; PERCENT IMPUTED - Language status
+HC02_EST_VC26,People who speak only English at home; Estimate; PERCENT IMPUTED - Language status
+HC02_MOE_VC26,People who speak only English at home; Margin of Error; PERCENT IMPUTED - Language status
+HC03_EST_VC26,Percent distribution of people who speak a language other than English at home  - Total; Estimate; PERCENT IMPUTED - Language status
+HC03_MOE_VC26,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; PERCENT IMPUTED - Language status
+HC04_EST_VC26,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; PERCENT IMPUTED - Language status
+HC04_MOE_VC26,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; PERCENT IMPUTED - Language status
+HC01_EST_VC27,Total; Estimate; PERCENT IMPUTED - Language status (speak a language other than English)
+HC01_MOE_VC27,Total; Margin of Error; PERCENT IMPUTED - Language status (speak a language other than English)
+HC02_EST_VC27,People who speak only English at home; Estimate; PERCENT IMPUTED - Language status (speak a language other than English)
+HC02_MOE_VC27,People who speak only English at home; Margin of Error; PERCENT IMPUTED - Language status (speak a language other than English)
+HC03_EST_VC27,Percent distribution of people who speak a language other than English at home  - Total; Estimate; PERCENT IMPUTED - Language status (speak a language other than English)
+HC03_MOE_VC27,Percent distribution of people who speak a language other than English at home  - Total; Margin of Error; PERCENT IMPUTED - Language status (speak a language other than English)
+HC04_EST_VC27,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Estimate; PERCENT IMPUTED - Language status (speak a language other than English)
+HC04_MOE_VC27,Percent distribution of people who speak a language other than English at home  - Spanish or Spanish Creole; Margin of Error; PERCENT IMPUTED - Language status (speak a language other than English)

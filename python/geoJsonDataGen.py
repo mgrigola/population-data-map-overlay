@@ -2,7 +2,7 @@
 This file is meant for single-use testing. Most of the reusable library stuff should go in the functions imported here.
 set fileShp = the base file name of the shape files
 optionally create a function to filter the shapefile at the feature level - it gets passed each feature in the shapefile, so something like return f['properties']['hasData']==1
-bBox is the bounding box. This doesn't check intersection, it checks if each 
+bBox is the bounding box. This doesn't check intersection, it checks if ANY vertex is inside the box
 '''
 
 from readDataACS import readDataACS

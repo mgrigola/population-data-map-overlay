@@ -1,0 +1,1 @@
+this is unrelated to the leaflet/javascript stuff, but a script to generate some random addresses from same larger project
