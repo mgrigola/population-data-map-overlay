@@ -1,10 +1,10 @@
 <html>
 <head>
-	<title>Population Density</title>
+	<title>map overlay</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 	<link rel="stylesheet" href="./leaflet/leaflet.css" />
 
 	<style>
@@ -27,14 +27,14 @@
 		}
 
 		.legend {
-			text-align: left;		
-			line-height: 18px;	
-			color: #333;			
+			text-align: left;
+			line-height: 18px;
+			color: #333;
 		}
 		.legend i {
-			width: 24px;			
-			height: 16px;			
-			float: left;				
+			width: 24px;
+			height: 16px;
+			float: left;
 			margin-right: 4px;
 			opacity: 0.5;
 		}
@@ -42,13 +42,13 @@
 </head>
 
 <body>
-	<div> a little something above the map</div>
+	<!--<div> a little something above the map</div>-->
 	<div id="map"></div>
-	<div> more below the map the map</div>
+	<!--<div> more below the map the map</div>-->
 
 	<script src="./leaflet/leaflet.js"></script>
 	<script src="./config/keys.js"></script>  						<!-- use your own mapbox key -->
-	<script src="./data/zipcodeShapeBounds.json"></script> 	<!-- zip code boundaries: geoJsonZipData -->
+	<!--<script src="./data/zipcodeShapeBounds.json"></script> 	&lt;!&ndash; zip code boundaries: geoJsonZipData &ndash;&gt;-->
 	<script src="./data/incomeDistribByZipcode.json"></script>				<!-- info aggregated by zip code: zipIncomeVals -->
 	<script src="./script/map_income_overlay.js"></script>
 	<!-- <script> alert("hello?"); </script> -->
