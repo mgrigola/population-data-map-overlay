@@ -20,4 +20,3 @@ columnKeys = ['HC01_EST_VC01','HC01_EST_VC02','HC01_EST_VC03','HC01_EST_VC04','H
 
 recList = translateShapefile(fileShp, always_true, bBox, 'ZCTA5CE10', 'zip')
 dataDict = readDataACS(fileCsv, columnKeys, 1, recList)
-
