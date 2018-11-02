@@ -349,11 +349,11 @@ function call_me_plz(d,i) {
     return "translate(" + spaceForLabels + "," + (i * barHeight + gapBetweenGroups * (0.5 + Math.floor(i/zipCount))) + ")";
 }
 
-function updateWindow(){
+function updateWindow() {
     x = w.innerWidth || e.clientWidth || g.clientWidth;
     y = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
     svg.attr("width", x).attr("height", y);
-    alert(
+    alert('ran update window');
 }
 d3.select(window).on('resize.updatesvg', updateWindow);
