@@ -58,10 +58,6 @@
     width: 100%;
 }
 
-.chart rect {
-  fill: steelblue;
-}
-*/
 .chart .legend {
   fill: black;
   font: 14px sans-serif;

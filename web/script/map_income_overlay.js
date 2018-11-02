@@ -1,4 +1,4 @@
-var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create config/config.js and set var configInfo.mapBoxApiKey = 'your_key'
+var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create config/config.js and set 
 var LMap = L.map('leaflet-map');  // big L is leaflet
 
 //the options for map styles
@@ -283,6 +283,12 @@ function on_location_error(e) {
 }
 
 
+var plotWidth       = 300,
+    barHeight        = 13,
+    spaceForLabels   = 50,
+    spaceForLegend   = 150,
+    gapBetweenGroups = 5,
+    zipCount;
 
 function add_d3_plot() {
     var plotData = [],plotLabels = [];
@@ -291,21 +297,17 @@ function add_d3_plot() {
 	    if (isNaN(intVal)) intVal = 0;
         plotData.push(intVal);
         plotLabels.push(zipId);
-        if (plotData.length >= 50)
+        if (plotData.length >= 250)
             break;
     }
-    var zipCount = plotData.length;
+    zipCount = plotData.length;
+    var maxVal = d3.max(plotData);
 
-    var plotWidth       = 300,
-        barHeight        = 15,
-        gapBetweenGroups = 10,
-        spaceForLabels   = 150,
-        spaceForLegend   = 150,
-        plotHeight      = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;
+    var plotHeight = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;
 
     var x = d3.scale.linear()
-        .domain([0, d3.max(plotData)])
-        .range([0, plotWidth]);
+        .domain([0, maxVal])
+        .range([0, plotWidth-spaceForLabels]);
 
     var y = d3.scale.linear()
         .range([plotHeight, 0]);
@@ -316,24 +318,42 @@ function add_d3_plot() {
         .tickSize(0)
         .orient("left");
 
-//    var plotTest = d3.select(".chart")
-//        .attr("width", plotWidth)
-//        .attr("height", plotHeight);
-//
-//    var plotBar = plotTest.selectAll("g")
-//        .data(plotData)
-//        .enter().append("g")
-//
-//    plotBar.append("rect")
-//        .attr("fill", function(val, idx) { return map_color(val); })
-//        .attr("class", "plot-bar")
-//        .attr("width", 100)
-//        .attr("height", barHeight);
-//
-//    plotBar.append("text")
-//        .attr("x", function(val) { return x(val)-3; })
-//        .attr("y", barHeight/2)
-//        .attr("fill", "#fff")
-//        .attr("dy", ".35em")
-//        .text(function(val) { return val; });
+    var plotTest = d3.select(".chart")
+        .attr("width", plotWidth)
+        .attr("height", plotHeight);
+
+    var plotBar = plotTest.selectAll("g")
+        .data(plotData)
+        .enter().append("g")
+        .attr("transform", call_me_plz); //
+
+    plotBar.append("rect")
+        .attr("fill", function(val, idx) { return map_color(val); })
+        .attr("class", "plot-bar")
+        .attr("width", function(d) { return x(d); })
+        .attr("height", barHeight);
+
+    plotBar.append("text")
+        .attr("x", function(d) { return Math.max(x(d)-3, 9); })
+        .attr("y", barHeight/2)
+        .attr("fill", "#fff")
+        .attr("dy", ".35em")
+        .text(function(d) { return '$'+d; });
+
+    plotBar.append("text")
+        .attr("class", "label");
 }
+
+//d = dataValue,  i = elementNumber (starts at 0 for first bar)
+function call_me_plz(d,i) {
+    return "translate(" + spaceForLabels + "," + (i * barHeight + gapBetweenGroups * (0.5 + Math.floor(i/zipCount))) + ")";
+}
+
+function updateWindow(){
+    x = w.innerWidth || e.clientWidth || g.clientWidth;
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    svg.attr("width", x).attr("height", y);
+    alert(
+}
+d3.select(window).on('resize.updatesvg', updateWindow);
