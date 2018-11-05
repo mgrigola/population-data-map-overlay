@@ -197,8 +197,9 @@ function highlight_feature(leafletLayer) {
         '<br>Area: '+(Math.floor( 100.0*regionIncome['area'] + 0.5) /100.0)+'mi<sup>2</sup>'+
         '<br>Household Density: '+(Math.floor( 100.0*regionIncome['house_density'] + 0.5) /100.0)+' households/mi<sup>2</sup>';
 
-    var popupLoc = leafletLayer['_bounds']['_northEast'];
-    popupLoc.lng = (popupLoc.lng + leafletLayer['_bounds']['_southWest'].lng)/2.0;
+    var locNE = leafletLayer['_bounds']['_northEast'];
+    var locSW = leafletLayer['_bounds']['_southWest'];
+    var popupLoc = {'lat': locNE.lat, 'lng': (locNE.lng+locSW.lng)/2.0};
     popup.setLatLng(popupLoc);  //boundary of feature layer, top-center
     popup.setContent(contentStr);
     popup.openOn(LMap);
