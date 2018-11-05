@@ -30,58 +30,116 @@ var baseLayers = {
     //,"sat": layerSat
 };
 
+var activeOverlays = [];
 L.control.layers(baseLayers).addTo(LMap);
 L.control.scale().addTo(LMap);
 
+LMap.on('overlayadd', function(layersControlEvent) {
+    //I'm sure there's a cleaner way but this:
+    //checks if activated layer had been previously active and moves it to top of this half-assed stack
+    //else inserts a new element at head and pushes everything back
+    var newLayer = layersControlEvent.name;
+    for (var layerNo=0; layerNo<activeOverlays.length; layerNo++) {
+        if (activeOverlays[layerNo] == newLayer) {
+            for (var moveNo=(layerNo-1); moveNo>=0; moveNo--) {
+                activeOverlays[moveNo+1] = activeOverlays[moveNo];
+            }
+            activeOverlays[0] = newLayer;
+            return;
+        }
+    }
+    activeOverlays.splice(0,0,newLayer);
+});
 
+LMap.on('overlayremove', function(layersControlEvent) {
+    //removes the removed (from the UI) layer from our (internal) iist and bumps other layers up
+    //first element in activeOverlays is the currently active layer (if any)
+    var oldLayer = layersControlEvent.name;
+    for (var layerNo=0; layerNo<activeOverlays.length; layerNo++) {
+        if (activeOverlays[layerNo] == oldLayer) {
+            activeOverlays.splice(layerNo, 1);
+        }
+    }
+});
+
+
+//these are standard labels defined by census bureau
+//the income dataset is from ACS (American Community Survey) ref#: S1901 (from 2016, 5year average ['12-'16] estimates)
+//HC01_EST_VC01: Households; Estimate; Total
+//HC01_EST_VC02: Households; Estimate; Less than $10,000
+//HC01_EST_VC03: Households; Estimate; $10,000 to $14,999
+//HC01_EST_VC04: Households; Estimate; $15,000 to $24,999
+//HC01_EST_VC05: Households; Estimate; $25,000 to $34,999
+//HC01_EST_VC06: Households; Estimate; $35,000 to $49,999
+//HC01_EST_VC07: Households; Estimate; $50,000 to $74,999
+//HC01_EST_VC08: Households; Estimate; $75,000 to $99,999
+//HC01_EST_VC09: Households; Estimate; $100,000 to $149,999
+//HC01_EST_VC10: Households; Estimate; $150,000 to $199,999
+//HC01_EST_VC11: Households; Estimate; $200,000 or more
+//HC01_EST_VC13: Households; Estimate; Median income (dollars)
+//HC01_EST_VC15: Households; Estimate; Mean income (dollars)
+//HC01_EST_VC18: Households; Estimate; PERCENT IMPUTED - Household income in the past 12 months
+var keyDefs = {
+    'HC01_EST_VC02': 'Less than $10,000',
+    'HC01_EST_VC03': '$10,000 to $14,999',
+    'HC01_EST_VC04': '$15,000 to $24,999',
+    'HC01_EST_VC05': '$25,000 to $34,999',
+    'HC01_EST_VC06': '$35,000 to $49,999',
+    'HC01_EST_VC07': '$50,000 to $74,999',
+    'HC01_EST_VC08': '$75,000 to $99,999',
+    'HC01_EST_VC09': '$100,000 to $149,999',
+    'HC01_EST_VC10': '$150,000 to $199,999',
+    'HC01_EST_VC11': '$200,000 or more'
+};
 
 
 var keyToDisplay = 'HC01_EST_VC15';
-var keyToDisplayPop = 'HC01_EST_VC01';
+var keyToDisplayPop = 'house_density'; //'HC01_EST_VC01';
 var keyToDisplayDescription = 'Mean Household Income ($)';
 
-var zipIncomeVals;
-var zipIncomeSrc = 'data/incomeDistribByZipcode.json';
+var zipIncomeVals = {};
+var zipIncomeSrc = 'data/incomeDistribByZipcode.json';  //now with all the zips in US?
 var geojsonZipData;  //the zip code boundary coordinates stored in (geo)JSON format
-var zipBoundSrc = 'data/cb_2017_us_zcta510_500k_WI.json';
-var loadedIncome = false, loadedBounds = false;
+var zipBoundSrc = 'data/cb_2017_us_zcta510_500k_IL.json';
 
 //load the interesting data and zip code boundaries.
 $(document).ready(function() {
-    $.getJSON(zipIncomeSrc, function(zipIncomeData) {
-        zipIncomeVals = zipIncomeData;
-        calc_colormap_scale(zipIncomeVals);
-        mapLegend.addTo(LMap);  //add legend after we load the data and know what scale to use
+    $.getJSON(zipIncomeSrc, function(zipIncomeJson) {
+        //tempIncome = zipIncomeJson;
+        //calc_colormap_scale(zipIncomeVals);
 
-        //if zipbounds loaded first, we want to apply the (new) style with color based on income data to existing elements
-        //if this runs first, loading zipbounds data will create the elements using style including income-based color?
-        //i think this always happens in its entirety before the income load
-        if (geojsonZipData)
-            geojsonZipData.resetStyle();
+        $.getJSON(zipBoundSrc, function(zipBoundJson) {
+            //
+            for (var featureId in zipBoundJson.features) {
+                var zipId = zipBoundJson.features[featureId].properties.zip;
+                zipIncomeVals[zipId] = zipIncomeJson[zipId];
+                zipIncomeVals[zipId]['area'] = calc_geodesic_area(zipBoundJson.features[featureId].geometry.coordinates);
+                zipIncomeVals[zipId]['house_density'] = zipIncomeVals[zipId]['HC01_EST_VC01']/zipIncomeVals[zipId]['area'];
+            }
+            calc_colormap_scale(zipIncomeVals);
 
-        loadedIncome = true;
-        add_d3_plot();
-    });
+            geojsonZipData = L.geoJson(zipBoundJson, {
+                style: style_region,
+                onEachFeature: on_each_feature
+            });
+            geojsonZipData.addTo(LMap);
+            activeOverlays.push('Mean Income'); //the addTo above doesn't trigger LMap.overlayadd, so add manually
 
-    $.getJSON(zipBoundSrc, function(jsonData) {
-        geojsonZipData = L.geoJson(jsonData, {
-            style: style_region,
-            onEachFeature: on_each_feature
+            //pop (households) is same geojson but we'll color it differently
+            geojsonZipDataPop = L.geoJson(zipBoundJson, {
+                style: style_region_pop,
+                onEachFeature: on_each_feature_pop
+            });
+
+            var overlays = {
+                "Mean Income": geojsonZipData,
+                "Population": geojsonZipDataPop
+            };
+
+            L.control.layers(null, overlays).addTo(LMap);  //add just the overlay, no baseLayer(already done above)
+            add_d3_plot();  //add the bar plot on right. only requires the income data
+            mapLegend.addTo(LMap);  //add legend after we load the data and know what scale to use
         });
-        geojsonZipData.addTo(LMap);
-
-        //pop (households) is same geojson but we'll color it differently
-        geojsonZipDataPop = L.geoJson(jsonData, {
-            style: style_region_pop,
-            onEachFeature: on_each_feature
-        });
-
-        var overlays = {
-            "Mean Income": geojsonZipData,
-            "Population": geojsonZipDataPop
-        };
-
-        L.control.layers(null, overlays).addTo(LMap);  //add just the overlay, no baseLayer(already done above)
     });
 });
 
@@ -89,53 +147,74 @@ $(document).ready(function() {
 var popup = L.popup();
 var regionId, regionElement;  //keeps tract of the currently active/selected region so we know when that changes
 
-
+var leafletLayerMapping = {};
 function on_each_feature(feature, layer) {
     layer.on({
-        mouseover: highlight_feature,
-        mouseout: reset_highlight,
+        mouseover: on_feature_mouseover,
+        mouseout: on_feature_mouseout,
         click: zoom_to_feature
+    });
+
+    var zipId = feature.properties.zip;
+    if (leafletLayerMapping.hasOwnProperty(zipId))
+        leafletLayerMapping[zipId]['Mean Income'] = layer;
+    else
+        leafletLayerMapping[zipId]= {'Mean Income': layer};
+}
+
+function on_each_feature_pop(feature, layer) {
+    layer.on({
+        mouseover: on_feature_mouseover,
+        mouseout: on_feature_mouseout,
+        click: zoom_to_feature
+    });
+
+    var zipId = feature.properties.zip;
+    if (leafletLayerMapping.hasOwnProperty(zipId))
+        leafletLayerMapping[zipId]['Population'] = layer;
+    else
+        leafletLayerMapping[zipId]= {'Population': layer};
+}
+
+
+function on_feature_mouseover(mouseEvent) { highlight_feature(mouseEvent.target); }
+function highlight_feature(leafletLayer) {
+    var gjsnFeature = leafletLayer.feature;  //the geoJson feature (a region)
+    var regionProps = gjsnFeature.properties;  //properties for the region (like id, whatever else is in the json file)
+
+    //see if element under mouse has changed. update highlighted region if different
+    if (regionId == regionProps.zip)
+        return;
+
+    regionId = regionProps.zip;
+    var regionIncome = zipIncomeVals[regionProps.zip];
+    var contentStr = '<h4>Popup Title</h4>'+
+        'L.ID: '+leafletLayer._leaflet_id+
+        '<br>ZIP Code: '+regionProps.zip+
+        '<br>Households: '+regionIncome.HC01_EST_VC01+
+        '<br>Median Income: $'+regionIncome.HC01_EST_VC13+
+        '<br>Mean Income: $'+regionIncome.HC01_EST_VC15+
+        '<br>Area: '+(Math.floor( 100.0*regionIncome['area'] + 0.5) /100.0)+'mi<sup>2</sup>'+
+        '<br>Household Density: '+(Math.floor( 100.0*regionIncome['house_density'] + 0.5) /100.0)+' households/mi<sup>2</sup>';
+
+    var popupLoc = leafletLayer['_bounds']['_northEast'];
+    popupLoc.lng = (popupLoc.lng + leafletLayer['_bounds']['_southWest'].lng)/2.0;
+    popup.setLatLng(popupLoc);  //boundary of feature layer, top-center
+    popup.setContent(contentStr);
+    popup.openOn(LMap);
+
+    //highlight boundary in thick green
+    leafletLayer.setStyle({
+        weight: 9,
+        color: '#693',
+        dashArray: '',
+        fillOpacity: 0.7
     });
 }
 
-function highlight_feature(e) {
-    var myLayer = e.target;
-    var gjsnFeature = e.target.feature;  //the geoJson feature (a region)
-    var regionProps = gjsnFeature.properties;  //properties for the region (like id, whatever else is in the json file)
-
-    //see if element under mouse has changed nd update highlighting accordingly
-    if (regionId != regionProps.zip) {
-        regionId = regionProps.zip;
-
-        //if we had an existing region highlighted, remove that highlighting?  can just do in mouseout
-        //if (regionElement)
-        //    geojsonZipData.resetStyle(regionElement.target);  // this will call style_region() for region
-
-
-        var regionIncome = zipIncomeVals[regionProps.zip];
-        var contentStr = '<h4>blah blah blah</h4>'+
-            'ID: '+myLayer._leaflet_id+
-            '<br>ZIP Code: '+regionProps.zip+
-            '<br>Households: '+regionIncome.HC01_EST_VC01+
-            '<br>Median Income: $'+regionIncome.HC01_EST_VC13+
-            '<br>Mean Income: $'+regionIncome.HC01_EST_VC15;
-
-        popup.setLatLng(e.latlng)  //where the mouse is?
-        popup.setContent(contentStr);
-        popup.openOn(LMap);
-
-        //highlight boundary in green
-        myLayer.setStyle({
-            weight: 9,
-            color: '#693',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
-    }
-}
-
-function reset_highlight(e) {
-    this.setStyle(this.defaultOptions.style(this.feature));
+function on_feature_mouseout(mouseEvent) { reset_highlight(mouseEvent.target); }
+function reset_highlight(leafletLayer) {
+    leafletLayer.setStyle(leafletLayer.defaultOptions.style(leafletLayer.feature));
     LMap.closePopup();
     regionId = null;
 }
@@ -162,14 +241,14 @@ function style_region_pop(feature) {
     var colorFill = '#000';
     if (zipIncomeVals) {
         var regionIncome = zipIncomeVals[feature.properties.zip];
-        colorFill = regionIncome ? map_color(regionIncome[keyToDisplayPop]) : '#000';
+        colorFill = regionIncome ? map_color_pop(regionIncome[keyToDisplayPop]) : '#000';
     }
     return {
         weight: 1,
         opacity: 0.7,
-        color: 'white',
+        color: 'black',
         dashArray: 5,
-        fillOpacity: (colorFill=='#000' ? 0 : .7),
+        fillOpacity: .5, //(colorFill=='#000' ? 0 : .7),
         fillColor: colorFill
     };
 }
@@ -191,14 +270,16 @@ function zoom_to_feature(e) {
 var controlInfo = L.control();
 var controlInfoIsVisible = false;
 controlInfo.onAdd = function (e) {
-    this._div = L.DomUtil.create('div', 'info'); //control info initialized with div element of class 'info'
+    this._div = L.DomUtil.create('div', 'info'); //'my-mini-plot');
     return this._div;
 };
 
 controlInfo.update = function (e) {
+
+
     if  (e) {
         var props = e.target.feature.properties;
-        var regionIncome = zipIncomeVals[props.zip.toString()];
+        var regionIncome = zipIncomeVals[props.zip];
         var detailStr = '<h4>Blibbity bloop</h4><div>Some more detailed info about this region</div>'+
             '<b>' + 'zip: ' + props.zip + '</b>'+
             '<div>income: ' + regionIncome['HC01_EST_VC15'] + '</div>';
@@ -237,16 +318,25 @@ mapLegend.onAdd = function (_) {
 
 //manually defining a colormap function. I'm sure there's a cleaner way
 var colormapMinVal = 10000, colormapMaxVal = 100000;  //default values until we load data
+var colormapMinPop = 10000, colormapMaxPop = 100000;  //some ugly copying of the income stuff for pop
 var legendGradeScale = 1000;
-function calc_colormap_scale(zipIncomeData) {
+function calc_colormap_scale() {
     colormapMinVal = 999999, colormapMaxVal = 0;
-    for (zipId in zipIncomeData) {
-        var val = parseInt(zipIncomeData[zipId][keyToDisplay]);
+    colormapMinPop = 999999, colormapMaxPop = 0;
+    for (zipId in zipIncomeVals) {
+        var val = parseInt(zipIncomeVals[zipId][keyToDisplay]);
         if (val < colormapMinVal)  colormapMinVal = val;
         if (val > colormapMaxVal)  colormapMaxVal = val;
+
+        var pop = parseInt(zipIncomeVals[zipId][keyToDisplayPop]);
+        if (pop < colormapMinPop)  colormapMinPop = pop;
+        if (pop > colormapMaxPop)  colormapMaxPop = pop;
     }
     colormapMinVal = Math.ceil(colormapMinVal/legendGradeScale)*legendGradeScale;
     colormapMaxVal = Math.floor(colormapMaxVal/legendGradeScale)*legendGradeScale;
+
+    colormapMinPop = Math.ceil(colormapMinPop/legendGradeScale)*legendGradeScale;
+    colormapMaxPop = Math.floor(colormapMaxPop/legendGradeScale)*legendGradeScale;
 }
 
 function rgb_2_str(r,g,b) {
@@ -255,7 +345,7 @@ function rgb_2_str(r,g,b) {
 
 function colormap_heat(val,minVal,maxVal,minRGB,maxRGB) {
     var scale = (val - minVal)/(maxVal - minVal);
-    scale = (scale<0) ? 0 : (scale>1) ? 1 : Math.pow(scale,0.5);
+    scale = (scale<0) ? 0 : ( (scale>1) ? 1 : Math.pow(scale,0.667) );  //bound scale on [0,1]. Apply like a gamma correction to make range visually easier to separate
     return rgb_2_str((maxRGB[0]-minRGB[0])*scale+minRGB[0] , (maxRGB[1]-minRGB[1])*scale+minRGB[1] , (maxRGB[2]-minRGB[2])*scale+minRGB[2]);
 }
 
@@ -263,6 +353,9 @@ function map_color(val) {
     return colormap_heat(val, colormapMinVal, colormapMaxVal, [0,64,255], [255,128,0]);
 }
 
+function map_color_pop(val) {
+    return colormap_heat(val, colormapMinPop, colormapMaxPop, [0,64,192], [0,255,128]);
+}
 
 //on initial load of map, try to find current location and center map there
 LMap.on('locationfound', on_location_found);
@@ -272,7 +365,7 @@ LMap.locate({setView: true});
 function on_location_found(e) {
     var uncertaintyRadius = e.accuracy / 2;
     //e.latlng = [43.03, -89.55];
-    L.marker(e.latlng).addTo(LMap).bindPopup('location uncertainty = ' + uncertaintyRadius + 'm?').openPopup();
+    L.marker(e.latlng).addTo(LMap).bindPopup('location uncertainty = ±' + uncertaintyRadius + 'm').openPopup();
     L.circle(e.latlng, uncertaintyRadius).addTo(LMap);
     LMap.setView(e.latlng, 9);
 }
@@ -283,77 +376,152 @@ function on_location_error(e) {
 }
 
 
-var plotWidth       = 300,
-    barHeight        = 13,
-    spaceForLabels   = 50,
-    spaceForLegend   = 150,
-    gapBetweenGroups = 5,
-    zipCount;
+var plotWidth = 300,
+    barHeight = 12,
+    spaceOnLeft = 50,
+    spaceOnRight = 5,
+    gapBetweenGroups = .5,
+    zipCount, maxPlotVal,
+    x_scale, y_scale;
 
 function add_d3_plot() {
-    var plotData = [],plotLabels = [];
+//    var plotData = [],plotLabels = [];
+    var plotObjs = [];
     for (var zipId in zipIncomeVals) {
         var intVal = +zipIncomeVals[zipId][keyToDisplay];
 	    if (isNaN(intVal)) intVal = 0;
-        plotData.push(intVal);
-        plotLabels.push(zipId);
-        if (plotData.length >= 250)
+//        plotData.push(intVal);
+//        plotLabels.push(zipId);
+        plotObjs.push([zipId, intVal]);
+        if (plotObjs.length >= 250)
             break;
     }
-    zipCount = plotData.length;
-    var maxVal = d3.max(plotData);
+    zipCount = plotObjs.length;
+    //maxPlotVal = d3.max(ployObjs);
+//    maxPlotVal = Math.max(plotObjs.map(obj => obj[1]), 0);  //finds max val in second col of plotObjs (max income)
+    maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
+    plotObjs.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotObjs by second col (income, desc)
 
     var plotHeight = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;
+    var myd3plot = document.getElementById("d3-plot");
+    plotWidth = myd3plot.clientWidth - spaceOnLeft - spaceOnRight;
 
-    var x = d3.scale.linear()
-        .domain([0, maxVal])
-        .range([0, plotWidth-spaceForLabels]);
+    //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
+    x_scale = d3.scale.linear()
+        .domain([0, maxPlotVal])
+        .range([0, plotWidth]);
 
-    var y = d3.scale.linear()
+    y_scale = d3.scale.linear()
         .range([plotHeight, 0]);
 
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .tickFormat('')
-        .tickSize(0)
-        .orient("left");
-
-    var plotTest = d3.select(".chart")
+    var plotChart = d3.select(".chart")
         .attr("width", plotWidth)
         .attr("height", plotHeight);
 
-    var plotBar = plotTest.selectAll("g")
-        .data(plotData)
+    //
+    var plotBars = plotChart.selectAll("g")
+        .data(plotObjs)   //data here
         .enter().append("g")
-        .attr("transform", call_me_plz); //
+            .attr("transform", calling_to_see_the_params); //
 
-    plotBar.append("rect")
-        .attr("fill", function(val, idx) { return map_color(val); })
-        .attr("class", "plot-bar")
-        .attr("width", function(d) { return x(d); })
+    plotBars.append("rect")
+        .attr("class", "plot-bars")
+        .attr("fill", function(d,i) { return map_color(d[1]); })
+        .attr("width", function(d) { return x_scale(d[1]); })
         .attr("height", barHeight);
 
-    plotBar.append("text")
-        .attr("x", function(d) { return Math.max(x(d)-3, 9); })
+    plotBars.append("text")
+        .attr("class", "text-values")
+        .attr("x", text_values_attr_x)
         .attr("y", barHeight/2)
         .attr("fill", "#fff")
-        .attr("dy", ".35em")
-        .text(function(d) { return '$'+d; });
+        .attr("dy", ".3em")
+        .text(function(d) { return '$'+d[1].toLocaleString(); });
 
-    plotBar.append("text")
-        .attr("class", "label");
+    plotBars.append("text")
+        .attr("class", "label")
+        .attr("x", function(d) { return -10; })
+        .attr("y", barHeight / 2)
+        .attr("dy", ".25em")
+        .text(function(d,i) { return d[0]; });
+
+    //draw a line for the y-axis, maybe with some tick marks
+    var y_axis = d3.svg.axis()
+        .scale(y_scale)
+        .tickFormat('')
+        .tickSize(0)
+        .orient("left");  //put tick left of axis
+
+    plotChart.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + (spaceOnLeft) + ", " + gapBetweenGroups + ")")
+      .call(y_axis);
+
+    d3.selectAll("rect").on("mouseover", my_mouseover_function);
+    d3.selectAll("rect").on("mouseout", my_mouseout_function);
+}
+
+function text_values_attr_x(d) {
+    return Math.max(x_scale(d[1])-3, 9);  //min cap at 9 so values are always right of axis
+}
+
+function my_mouseover_function() {
+    var selectedThing = d3.select(this);
+    selectedThing.style("fill", "#693");
+    var zipId = selectedThing.datum()[0];
+    var activeOverlay = activeOverlays[0];
+    var topLayer = leafletLayerMapping[zipId][activeOverlay];
+    highlight_feature(topLayer);
+}
+
+function my_mouseout_function() {
+    var selectedThing = d3.select(this);
+    selectedThing.style("fill", map_color(selectedThing.datum()[1]) );
+    var zipId = selectedThing.datum()[0];
+    var activeOverlay = activeOverlays[0];
+    var topLayer = leafletLayerMapping[zipId][activeOverlay];
+    reset_highlight(topLayer);
 }
 
 //d = dataValue,  i = elementNumber (starts at 0 for first bar)
-function call_me_plz(d,i) {
-    return "translate(" + spaceForLabels + "," + (i * barHeight + gapBetweenGroups * (0.5 + Math.floor(i/zipCount))) + ")";
+function calling_to_see_the_params(d,i) {
+    return "translate(" + spaceOnLeft + "," + (i * (barHeight+gapBetweenGroups) + (0.5 * barHeight)) + ")";
 }
 
-function updateWindow() {
-    x = w.innerWidth || e.clientWidth || g.clientWidth;
-    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+function update_window_resize() {
+    if (!x_scale)
+        return;
 
-    svg.attr("width", x).attr("height", y);
-    alert('ran update window');
+    var plotBars = d3.select(".chart").selectAll("g");
+
+    plotWidth = document.getElementById("d3-plot").clientWidth - spaceOnLeft - spaceOnRight;
+    x_scale.range([0, plotWidth]);
+    plotBars.selectAll("plot-bars").attr("width", function(d) { return x_scale(d[1]); });
+    plotBars.selectAll("text-values").attr("x", text_values_attr_x);
 }
-d3.select(window).on('resize.updatesvg', updateWindow);
+d3.select(window).on('resize.updatesvg', update_window_resize);
+
+
+//calculate area from coordinates. math
+//coordinates for a geojson object are an array of polygons ('islands' are separate polygons)
+//I've removed negative spaces ('holes') in pre-processing, so don't need to worry about that
+// ignoring negative holes will make some areas wrong, but it makes this calculation simpler
+function calc_geodesic_area(coords) {
+    var area = 0.0,
+        deg2rad = Math.PI/180,
+        polygon, ptCnt, p1, p2;
+
+    for (var polyNo=0; polyNo<coords.length; polyNo++) {
+        polygon = coords[polyNo]
+        ptCnt = polygon.length;
+        if (ptCnt > 2) {
+            for (var ptNo=0; ptNo<ptCnt; ptNo++) {
+                p1 = polygon[ptNo];
+                p2 = polygon[ (ptNo+1) % ptCnt ];
+                area += ((p2[0] - p1[0]) * deg2rad) * (2 + Math.sin(p1[1] * deg2rad) + Math.sin(p2[1] * deg2rad));
+            }
+        }
+    }
+
+    return Math.abs(area * 3963.19 * 3963.19 / 2.0);  //Earth_rad in meters: 6378137.0 | miles: 3963.19
+}

@@ -48,8 +48,8 @@
 	text-align: center;
 }
 
-.plot-bar : hover {
-	fill: #ffffff;
+.plot-bars : hover {
+	fill: white;
 }
 
 .chart {
@@ -67,12 +67,23 @@
 
 .chart text {
   fill: white;
-  font: 10px sans-serif;
+  font: 9px sans-serif;
   text-anchor: end;
 }
 
 .chart .label {
-  fill: black;
-  font: 14px sans-serif;
+  fill: #fff;
+  font: 12px sans-serif;
   text-anchor: end;
+}
+
+.chart plot-bars : hover {
+  fill: #fff;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
 }
