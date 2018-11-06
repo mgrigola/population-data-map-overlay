@@ -41,8 +41,8 @@
 .d3-plot-class {
 	width: 30%;
 	height: 100%;
-	background-color: #000000;
-	color: #ffffff;
+	background-color: #000;
+	color: #fff;
 	Font-family: Helvetica;
 	font-size: 32pt;
 	text-align: center;
@@ -86,4 +86,11 @@
   fill: none;
   stroke: #fff;
   shape-rendering: crispEdges;
+}
+
+.my-div-icon {
+    fill: green;
+    font: 12px sans-serif;
+    /* background-color: #000; */
+	color: #fff;
 }

@@ -1,19 +1,24 @@
-var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create config/config.js and set 
+var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create config/config.js and set
 var LMap = L.map('leaflet-map');  // big L is leaflet
 
 //the options for map styles
-var layerLight = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapBoxKey, {
+var layerLight = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
+    accessToken: mapBoxKey,
     maxZoom: 13,
     minZoom: 7,
     attribution: 'mapbox.com',
-    id: 'mapbox.light'
+    styleId: 'mapbox.light',
+    styleId: 'mapbox.light',
+    format: 'jpg70'
 }).addTo(LMap);
 
-var layerDark = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapBoxKey, {
+var layerDark = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
+    accessToken: mapBoxKey,
     maxZoom: 13,
     minZoom: 7,
     attribution: 'mapbox.com',
-    id: 'mapbox.dark'
+    styleId: 'mapbox.dark',
+    format: 'png'
 }).addTo(LMap);
 
 //      //this guy takes a little longer to load maybe
@@ -24,6 +29,7 @@ var layerDark = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
 //			id: 'mapbox.satellite'
 //		}).addTo(LMap);
 
+//unnecessary to have multiple layers here. just to see/show how baselayers works
 var baseLayers = {
     "light": layerLight,
     "dark": layerDark
@@ -62,6 +68,107 @@ LMap.on('overlayremove', function(layersControlEvent) {
     }
 });
 
+var distTooltip, distMarkerA, distMarkerB, distPolyline, drawingLine=false, clearTimer;
+LMap.on('click', function(mouseEvent) {
+    if (!drawingLine && mouseEvent.originalEvent.ctrlKey) {
+        if (distPolyline) {
+            clear_distance_markers();
+        }
+        else {
+            distPolyline = L.polyline([], {color: 'red', opacity: 0.25, dashArray: '4', interactive: false});
+        }
+        distPolyline.setStyle({opacity: 0.2});
+        distPolyline.addTo(LMap);
+        drawingLine = true;
+        distMarkerA = L.marker(mouseEvent.latlng, {
+            //icon: L.divIcon({className: 'my-div-icon'}),
+            title: 'A',
+            opacity: 0.75,
+            keyboard: false
+        });
+        distMarkerA.addTo(LMap); //.bindPopup('<h4>A</h4><div>distP1</div>').openPopup();
+        distTooltip = L.tooltip({direction:'right', offset: [0,-10]});
+        LMap.addEventListener('mousemove', update_distance_line);
+    }
+    else if (drawingLine) {
+        drawingLine = false;
+        LMap.removeEventListener('mousemove', update_distance_line);
+        distMarkerB = L.marker(mouseEvent.latlng, {
+            //icon: L.divIcon({className: 'my-div-icon'}),  //don't use the marker, build our own marker
+            title: 'B',
+            opacity: 0.75,
+            keyboard: false
+        });
+        distMarkerB.addTo(LMap); //.bindPopup('<h4>B</h4><div>distP1</div>').openPopup();
+        distPolyline.setLatLngs([distMarkerA.getLatLng(), distMarkerB.getLatLng()]);
+        distPolyline.setStyle({opacity: 0.8});
+        distMarkerA.options.opacity = 0.75;
+        distMarkerB.options.opacity = 0.75;
+        var dist = calc_distance(distMarkerA.getLatLng(), distMarkerB.getLatLng());
+
+        distPolyline.bindTooltip(distTooltip).openTooltip();
+        distTooltip.setContent(dist+' mi');
+        clearTimer = window.setTimeout(clear_distance_markers, 3000);
+    }
+});
+
+function update_distance_line(mouseEvent) {
+    var dist = calc_distance(distMarkerA.getLatLng(), mouseEvent.latlng);
+    distPolyline.setLatLngs([distMarkerA.getLatLng(), mouseEvent.latlng])
+
+    distPolyline.bindTooltip(distTooltip).openTooltip();
+    distTooltip.setContent(dist+' mi');
+};
+
+function clear_distance_markers() {
+    window.clearTimeout(clearTimer);
+    if (drawingLine)
+        return;
+
+    if(distMarkerA) distMarkerA.remove();
+    if(distMarkerB) distMarkerB.remove();
+    if(distPolyline) {
+        distPolyline.setLatLngs([]);
+        distPolyline.remove();
+    }
+}
+
+//haversine formula to calculate great circle distance between 2 latlng coords
+function calc_distance(ptA, ptB) {
+    var rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137
+        deg2rad = Math.PI/180,
+        dLng = deg2rad*(ptB.lng-ptA.lng)/2.0,
+        dLat = deg2rad*(ptB.lat-ptA.lat)/2.0;
+
+    var h = Math.pow(Math.sin(dLat), 2) + Math.pow(Math.sin(dLng), 2)*Math.cos(deg2rad*ptA.lat)*Math.cos(deg2rad*ptB.lat);
+    return round_sig_figs(2*rEarth*Math.asin(Math.sqrt(h)), 3, false);
+}
+
+//There's a toFixed(decimals) and toPrecision(sigFigs), but I don't like them.
+//  This is like toPrecision, but doesn't do scientific notation
+//given value and number of significant figures, returns the value rounded appropriately (as float)
+//something like 1.00 will present as 1. rounds -1.5 to -2 (away from 0)
+function round_sig_figs(val, sigFigs=3, trailZeros=false) {
+    var sign = Math.sign(val);
+    var logTen = Math.floor(Math.log10(sign*val));
+    var scale = Math.pow(10.0, sigFigs - logTen - 1);
+    var noDecVal = sign*Math.round(sign*val*scale);
+    var roundedVal = noDecVal / scale;
+    if (!trailZeros) return roundedVal
+
+    //TODO
+    //this doesn't work atm. consider 600: 600+"00" = "60000",  60.0: 60+"00" = "6000". Gotta consider the decimal place
+    //for something like 3 sigfigs for 0.02, we want to return '0.0200'
+    //if the tens, hundreds, etc -place digit is 0, we record '0' and move to next place
+    //the noDecVal will be like 200 for 0.02 -> sigfigs end at the decimal and we divide at end
+    var trailingZeroStr = '';
+    var digitMultiplier = 10;
+    while (noDecVal%digitMultiplier==0) {
+        trailingZeroStr += '0';
+        digitMultiplier *= 10;
+    }
+    return roundedVal+trailingZeroStr;  //0.02+'00' = '0.0200'
+}
 
 //these are standard labels defined by census bureau
 //the income dataset is from ACS (American Community Survey) ref#: S1901 (from 2016, 5year average ['12-'16] estimates)
@@ -144,7 +251,7 @@ $(document).ready(function() {
 });
 
 
-var popup = L.popup();
+var popup = L.popup({autoPan: false, className: 'info'});
 var regionId, regionElement;  //keeps tract of the currently active/selected region so we know when that changes
 
 var leafletLayerMapping = {};
@@ -188,17 +295,16 @@ function highlight_feature(leafletLayer) {
 
     regionId = regionProps.zip;
     var regionIncome = zipIncomeVals[regionProps.zip];
-    var contentStr = '<h4>Popup Title</h4>'+
-        'L.ID: '+leafletLayer._leaflet_id+
-        '<br>ZIP Code: '+regionProps.zip+
+    var contentStr = '<h4>'+regionProps.zip+'</h4>'+
         '<br>Households: '+regionIncome.HC01_EST_VC01+
         '<br>Median Income: $'+regionIncome.HC01_EST_VC13+
         '<br>Mean Income: $'+regionIncome.HC01_EST_VC15+
         '<br>Area: '+(Math.floor( 100.0*regionIncome['area'] + 0.5) /100.0)+'mi<sup>2</sup>'+
         '<br>Household Density: '+(Math.floor( 100.0*regionIncome['house_density'] + 0.5) /100.0)+' households/mi<sup>2</sup>';
 
-    var popupLoc = leafletLayer['_bounds']['_northEast'];
-    popupLoc.lng = (popupLoc.lng + leafletLayer['_bounds']['_southWest'].lng)/2.0;
+    var locNE = leafletLayer['_bounds']['_northEast'];
+    var locSW = leafletLayer['_bounds']['_southWest'];
+    var popupLoc = {'lat': locNE.lat, 'lng': (locNE.lng+locSW.lng)/2.0};
     popup.setLatLng(popupLoc);  //boundary of feature layer, top-center
     popup.setContent(contentStr);
     popup.openOn(LMap);
@@ -208,7 +314,7 @@ function highlight_feature(leafletLayer) {
         weight: 9,
         color: '#693',
         dashArray: '',
-        fillOpacity: 0.7
+        //fillOpacity: 0.7
     });
 }
 
@@ -257,9 +363,9 @@ function style_region_pop(feature) {
 //user clicks/selects a feature/region and we zoom to fit region in view and show info about region
 function zoom_to_feature(e) {
     LMap.fitBounds(e.target.getBounds());
-    if (!controlInfoIsVisible) {
+    if (!controlInfo.isVisible) {
         controlInfo.addTo(LMap);
-        controlInfoIsVisible = true;
+        controlInfo.isVisible = true;
     }
 
     controlInfo.update(e);
@@ -268,29 +374,32 @@ function zoom_to_feature(e) {
 
 //adds this little info popup box overlaid on the right of the map with some contextual detail
 var controlInfo = L.control();
-var controlInfoIsVisible = false;
+//var controlInfoIsVisible = false;
+controlInfo.isVisible = false;  //can i do this?
 controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'info'); //'my-mini-plot');
     return this._div;
 };
 
 controlInfo.update = function (e) {
-
-
-    if  (e) {
+    if  (e.target) {
         var props = e.target.feature.properties;
         var regionIncome = zipIncomeVals[props.zip];
-        var detailStr = '<h4>Blibbity bloop</h4><div>Some more detailed info about this region</div>'+
-            '<b>' + 'zip: ' + props.zip + '</b>'+
-            '<div>income: ' + regionIncome['HC01_EST_VC15'] + '</div>';
+
+        //I'm sure this is not the way to do this... TODO
+        var detailStr = '<h4>Detail</h4><table>';
+        for (var key in keyDefs) {
+            detailStr += '<tr><td>'+keyDefs[key]+'</td><td>'+regionIncome[key]+'</td></tr>';
+        }
+        detailStr += '</table>'
         this._div.innerHTML = detailStr;
     }
 };
 
 function clear_info(e) {
-    if (controlInfoIsVisible) {
+    if (controlInfo.isVisible) {
         controlInfo.remove(LMap);
-        controlInfoIsVisible = false;
+        controlInfo.isVisible = false;
     }
 }
 
@@ -509,6 +618,7 @@ d3.select(window).on('resize.updatesvg', update_window_resize);
 function calc_geodesic_area(coords) {
     var area = 0.0,
         deg2rad = Math.PI/180,
+        rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137  //it varies, so more than like 2/3 sigfigs is not justifiable
         polygon, ptCnt, p1, p2;
 
     for (var polyNo=0; polyNo<coords.length; polyNo++) {
@@ -523,5 +633,5 @@ function calc_geodesic_area(coords) {
         }
     }
 
-    return Math.abs(area * 3963.19 * 3963.19 / 2.0);  //Earth_rad in meters: 6378137.0 | miles: 3963.19
+    return Math.abs(area*rEarth*rEarth / 2.0);
 }
