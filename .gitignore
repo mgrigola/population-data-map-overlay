@@ -3,7 +3,6 @@ web/config/keys.js
 
 # jetbrains IDE config file
 .idea/*
-.idea*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
