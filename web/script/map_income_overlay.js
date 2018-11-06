@@ -523,7 +523,7 @@ function add_d3_plot() {
     y_scale = d3.scale.linear()
         .range([plotHeight, 0]);
 
-    var plotChart = d3.select(".chart")
+    var plotChart = d3.select("#d3-plot")
         .attr("width", plotWidth)
         .attr("height", plotHeight);
 
@@ -601,12 +601,12 @@ function update_window_resize() {
     if (!x_scale)
         return;
 
-    var plotBars = d3.select(".chart").selectAll("g");
+    var plotRef = d3.select("#d3-plot");
 
-    plotWidth = document.getElementById("d3-plot").clientWidth - spaceOnLeft - spaceOnRight;
+    plotWidth = plotRef.node().getBoundingClientRect().width - spaceOnLeft - spaceOnRight;
     x_scale.range([0, plotWidth]);
-    plotBars.selectAll("plot-bars").attr("width", function(d) { return x_scale(d[1]); });
-    plotBars.selectAll("text-values").attr("x", text_values_attr_x);
+    plotRef.selectAll(".plot-bars").attr("width", function(d) { return x_scale(d[1]); });
+    plotRef.selectAll(".text-values").attr("x", text_values_attr_x);
 }
 d3.select(window).on('resize.updatesvg', update_window_resize);
 
