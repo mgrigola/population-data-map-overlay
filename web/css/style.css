@@ -3,6 +3,7 @@
 	height: 100%;
 }
 
+
 .info {
 	padding: 0px 0px;
 	font: 14px Arial, Helvetica, sans-serif;
@@ -38,6 +39,8 @@
 	text-align: center;
 }
 
+
+
 .d3-plot-class {
 	width: 30%;
 	height: 100%;
@@ -48,49 +51,37 @@
 	text-align: center;
 }
 
-.plot-bars : hover {
-	fill: white;
-}
-
-.chart {
+.d3-plot-class {
     background-color: #333;
     height: 100%;
     width: 100%;
 }
 
-.chart .legend {
-  fill: black;
-  font: 14px sans-serif;
-  text-anchor: start;
-  font-size: 12px;
-}
-
-.chart text {
-  fill: white;
-  font: 9px sans-serif;
+#d3-plot .text-values {
+  fill: #fff;
+  font: 10px sans-serif;
   text-anchor: end;
 }
 
-.chart .label {
+.d3-plot-class .label {
   fill: #fff;
-  font: 12px sans-serif;
+  font: 11px sans-serif;
   text-anchor: end;
 }
 
-.chart plot-bars : hover {
-  fill: #fff;
+.d3-plot-class .label : hover {
+  fill: #00f;
 }
 
-.axis path,
-.axis line {
+.y-axis path,
+.y-axis line {
   fill: none;
   stroke: #fff;
   shape-rendering: crispEdges;
 }
 
 .my-div-icon {
-    fill: green;
+    fill: #090;
     font: 12px sans-serif;
-    /* background-color: #000; */
-	color: #fff;
+	color: #555;
 }

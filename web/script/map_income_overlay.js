@@ -9,7 +9,7 @@ var layerLight = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{f
     attribution: 'mapbox.com',
     styleId: 'mapbox.light',
     styleId: 'mapbox.light',
-    format: 'jpg70'
+    format: 'png'
 }).addTo(LMap);
 
 var layerDark = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
@@ -144,6 +144,31 @@ function calc_distance(ptA, ptB) {
     return round_sig_figs(2*rEarth*Math.asin(Math.sqrt(h)), 3, false);
 }
 
+//calculate area from coordinates. math
+//coordinates for a geojson object are an array of polygons ('islands' are separate polygons)
+//I've removed negative spaces ('holes') in pre-processing, so don't need to worry about that
+// ignoring negative holes will make some areas wrong, but it makes this calculation simpler
+function calc_geodesic_area(coords) {
+    var area = 0.0,
+        deg2rad = Math.PI/180,
+        rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137  //it varies, so more than like 2/3 sigfigs is not justifiable
+        polygon, ptCnt, p1, p2;
+
+    for (var polyNo=0; polyNo<coords.length; polyNo++) {
+        polygon = coords[polyNo]
+        ptCnt = polygon.length;
+        if (ptCnt > 2) {
+            for (var ptNo=0; ptNo<ptCnt; ptNo++) {
+                p1 = polygon[ptNo];
+                p2 = polygon[ (ptNo+1) % ptCnt ];
+                area += ((p2[0] - p1[0]) * deg2rad) * (2 + Math.sin(p1[1] * deg2rad) + Math.sin(p2[1] * deg2rad));
+            }
+        }
+    }
+
+    return Math.abs(area*rEarth*rEarth / 2.0);
+}
+
 //There's a toFixed(decimals) and toPrecision(sigFigs), but I don't like them.
 //  This is like toPrecision, but doesn't do scientific notation
 //given value and number of significant figures, returns the value rounded appropriately (as float)
@@ -257,9 +282,9 @@ var regionId, regionElement;  //keeps tract of the currently active/selected reg
 var leafletLayerMapping = {};
 function on_each_feature(feature, layer) {
     layer.on({
-        mouseover: on_feature_mouseover,
-        mouseout: on_feature_mouseout,
-        click: zoom_to_feature
+        mouseover: on_mouseover_feature,
+        mouseout: on_mouseout_feature,
+        click: on_click_feature
     });
 
     var zipId = feature.properties.zip;
@@ -271,9 +296,9 @@ function on_each_feature(feature, layer) {
 
 function on_each_feature_pop(feature, layer) {
     layer.on({
-        mouseover: on_feature_mouseover,
-        mouseout: on_feature_mouseout,
-        click: zoom_to_feature
+        mouseover: on_mouseover_feature,
+        mouseout: on_mouseout_feature,
+        click: on_click_feature
     });
 
     var zipId = feature.properties.zip;
@@ -284,7 +309,7 @@ function on_each_feature_pop(feature, layer) {
 }
 
 
-function on_feature_mouseover(mouseEvent) { highlight_feature(mouseEvent.target); }
+function on_mouseover_feature(mouseEvent) { highlight_feature(mouseEvent.target); }
 function highlight_feature(leafletLayer) {
     var gjsnFeature = leafletLayer.feature;  //the geoJson feature (a region)
     var regionProps = gjsnFeature.properties;  //properties for the region (like id, whatever else is in the json file)
@@ -318,7 +343,7 @@ function highlight_feature(leafletLayer) {
     });
 }
 
-function on_feature_mouseout(mouseEvent) { reset_highlight(mouseEvent.target); }
+function on_mouseout_feature(mouseEvent) { reset_highlight(mouseEvent.target); }
 function reset_highlight(leafletLayer) {
     leafletLayer.setStyle(leafletLayer.defaultOptions.style(leafletLayer.feature));
     LMap.closePopup();
@@ -361,42 +386,46 @@ function style_region_pop(feature) {
 
 
 //user clicks/selects a feature/region and we zoom to fit region in view and show info about region
-function zoom_to_feature(e) {
-    LMap.fitBounds(e.target.getBounds());
+function on_click_feature(mouseEvent) { zoom_to_feature(mouseEvent.target); }
+function zoom_to_feature(leafletLayer) {
+    var bounds = leafletLayer.getBounds();
+    LMap.fitBounds(bounds, {paddingTopLeft:[150,150], paddingBottomRight:[150,0]});
     if (!controlInfo.isVisible) {
         controlInfo.addTo(LMap);
         controlInfo.isVisible = true;
     }
 
-    controlInfo.update(e);
-    LMap.addOneTimeEventListener('mousedown',clear_info);  // "hide" the info box when user clicks elsewhere
+    controlInfo.update_info(leafletLayer);
+    LMap.addOneTimeEventListener('mousedown', controlInfo.clear_info);  // "hide" the info box when user clicks elsewhere
+    regionId = null;
+    highlight_feature(leafletLayer);
 }
 
 //adds this little info popup box overlaid on the right of the map with some contextual detail
 var controlInfo = L.control();
-//var controlInfoIsVisible = false;
 controlInfo.isVisible = false;  //can i do this?
 controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'info'); //'my-mini-plot');
     return this._div;
 };
 
-controlInfo.update = function (e) {
-    if  (e.target) {
-        var props = e.target.feature.properties;
-        var regionIncome = zipIncomeVals[props.zip];
+controlInfo.update_info = function(leafletLayer) {
+    if  (!leafletLayer)
+        return;
 
-        //I'm sure this is not the way to do this... TODO
-        var detailStr = '<h4>Detail</h4><table>';
-        for (var key in keyDefs) {
-            detailStr += '<tr><td>'+keyDefs[key]+'</td><td>'+regionIncome[key]+'</td></tr>';
-        }
-        detailStr += '</table>'
-        this._div.innerHTML = detailStr;
+    var props = leafletLayer.feature.properties;
+    var regionIncome = zipIncomeVals[props.zip];
+
+    //I'm sure this is not the way to do this... TODO
+    var detailStr = '<h4>Detail</h4><table>';
+    for (var key in keyDefs) {
+        detailStr += '<tr><td>'+keyDefs[key]+'</td><td>'+regionIncome[key]+'</td></tr>';
     }
+    detailStr += '</table>'
+    this._div.innerHTML = detailStr;
 };
 
-function clear_info(e) {
+controlInfo.clear_info = function(mouseEvent) {
     if (controlInfo.isVisible) {
         controlInfo.remove(LMap);
         controlInfo.isVisible = false;
@@ -485,35 +514,43 @@ function on_location_error(e) {
 }
 
 
+d3.selection.prototype.moveToBack = function() {
+    return this.each(function() {
+        this.parentNode.insertBefore(this, this.parentNode.firstChild);
+    });
+};
+
+
 var plotWidth = 300,
     barHeight = 12,
-    spaceOnLeft = 50,
-    spaceOnRight = 5,
+    spaceOnLeft = 38,
+    spaceOnRight = 4,
+    labelEndToRectStart = 4,
     gapBetweenGroups = .5,
     zipCount, maxPlotVal,
-    x_scale, y_scale;
+    x_scale, y_scale,
+    scrollRow=0,
+    svgHeight, svgWidth;
 
 function add_d3_plot() {
-//    var plotData = [],plotLabels = [];
     var plotObjs = [];
     for (var zipId in zipIncomeVals) {
         var intVal = +zipIncomeVals[zipId][keyToDisplay];
-	    if (isNaN(intVal)) intVal = 0;
-//        plotData.push(intVal);
-//        plotLabels.push(zipId);
+	    if (isNaN(intVal))
+	        intVal = 0;
         plotObjs.push([zipId, intVal]);
         if (plotObjs.length >= 250)
             break;
     }
     zipCount = plotObjs.length;
-    //maxPlotVal = d3.max(ployObjs);
-//    maxPlotVal = Math.max(plotObjs.map(obj => obj[1]), 0);  //finds max val in second col of plotObjs (max income)
     maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
     plotObjs.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotObjs by second col (income, desc)
 
     var plotHeight = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;
-    var myd3plot = document.getElementById("d3-plot");
-    plotWidth = myd3plot.clientWidth - spaceOnLeft - spaceOnRight;
+    var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
+    svgWidth = divRect.width;
+    svgHeight = divRect.height;
+    plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
 
     //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
     x_scale = d3.scale.linear()
@@ -531,50 +568,113 @@ function add_d3_plot() {
     var plotBars = plotChart.selectAll("g")
         .data(plotObjs)   //data here
         .enter().append("g")
-            .attr("transform", calling_to_see_the_params); //
+            .attr("transform", plot_elem_transform);
 
     plotBars.append("rect")
         .attr("class", "plot-bars")
         .attr("fill", function(d,i) { return map_color(d[1]); })
         .attr("width", function(d) { return x_scale(d[1]); })
-        .attr("height", barHeight);
+        .attr("height", barHeight)
+        .on({"mouseover": on_mouseover_plotbars, "mouseout": on_mouseout_plotbars, "click": on_click_plotbars});
 
+    //the text inside the bar that shows the value
     plotBars.append("text")
         .attr("class", "text-values")
         .attr("x", text_values_attr_x)
         .attr("y", barHeight/2)
-        .attr("fill", "#fff")
-        .attr("dy", ".3em")
+        //.attr("fill", "#fff")
+        .attr("dy", ".4em")
         .text(function(d) { return '$'+d[1].toLocaleString(); });
 
+    //the y-axis label showing the zip code
     plotBars.append("text")
         .attr("class", "label")
-        .attr("x", function(d) { return -10; })
+        .attr("x", function(d) { return - labelEndToRectStart; })
         .attr("y", barHeight / 2)
-        .attr("dy", ".25em")
+        .attr("dy", ".35em")
         .text(function(d,i) { return d[0]; });
 
-    //draw a line for the y-axis, maybe with some tick marks
-    var y_axis = d3.svg.axis()
+    //define a line for the y-axis, maybe with some tick marks
+    var y_axis = d3.svg.axis()  //TODO fix axis scrolling with everything else
         .scale(y_scale)
         .tickFormat('')
         .tickSize(0)
         .orient("left");  //put tick left of axis
 
+    //draw/update the y-axis?
     plotChart.append("g")
-      .attr("class", "y axis")
-      .attr("transform", "translate(" + (spaceOnLeft) + ", " + gapBetweenGroups + ")")
+      .attr("class", "y-axis")
+      .attr("transform", "translate(" + spaceOnLeft + ", " + gapBetweenGroups + ")")
       .call(y_axis);
 
-    d3.selectAll("rect").on("mouseover", my_mouseover_function);
-    d3.selectAll("rect").on("mouseout", my_mouseout_function);
+    //callbacks for interactivity with the map side TODO probably should be appended to other plot-bars stuff
+//    d3.selectAll(".plot-bars").on("mouseover", on_mouseover_plotbars);
+//    d3.selectAll(".plot-bars").on("mouseout", on_mouseout_plotbars);
+//    d3.selectAll(".plot-bars").on("click", on_click_plotbars);
+
+    plotChart.append('rect')
+        .attr("class", 'scroll-area-bot')
+        .attr("width", svgWidth)
+        .attr("height", svgHeight*0.25)
+        .attr("transform", 'translate(0, '+svgHeight*0.75+')')
+        .attr("fill", 'rgba(0,255,255,0.1)')  // == 'transparent'  TODO non-zero alpha for debugging
+        .on('click', on_click_scroll_down)
+        .moveToBack();
+
+    plotChart.append('rect')
+        .attr("class", 'scroll-area-top')
+        .attr("width", svgWidth)
+        .attr("height", svgHeight*0.25)
+        .attr("transform", 'translate(0, 0)') //not needed
+        .attr("fill", 'rgba(255,0,255,0.1)')  // == 'transparent'
+        .on('click', on_click_scroll_up)
+        .moveToBack();
+}
+
+function plot_elem_transform(datum, index) {
+    var yPos = (index-scrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
+    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";
+}
+
+var oldScrollRow=0;
+function plot_elem_transform_old(datum, index) {
+    var yPos = (index-oldScrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
+    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";
+}
+
+
+function on_click_scroll_down(arg1, arg2) {
+    var maxScroll = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenGroups));
+    if (scrollRow == maxScroll)
+        return;
+
+    scrollRow = Math.min(scrollRow+20, maxScroll);
+    d3.select("#d3-plot").selectAll("g")
+        .attr("transform", plot_elem_transform_old) //transition from state before .transition to state after?
+        .transition().duration(500)
+            .attr("transform", plot_elem_transform);
+
+    oldScrollRow = scrollRow;
+}
+
+function on_click_scroll_up(arg1, arg2) {
+    if (scrollRow == 0)
+        return;
+
+    scrollRow = Math.max(scrollRow-20, 0);
+    d3.select("#d3-plot").selectAll("g")
+        .attr("transform", plot_elem_transform_old)
+        .transition().duration(500)
+            .attr("transform", plot_elem_transform);
+
+    oldScrollRow = scrollRow;
 }
 
 function text_values_attr_x(d) {
-    return Math.max(x_scale(d[1])-3, 9);  //min cap at 9 so values are always right of axis
+    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
 }
 
-function my_mouseover_function() {
+function on_mouseover_plotbars() {
     var selectedThing = d3.select(this);
     selectedThing.style("fill", "#693");
     var zipId = selectedThing.datum()[0];
@@ -583,7 +683,7 @@ function my_mouseover_function() {
     highlight_feature(topLayer);
 }
 
-function my_mouseout_function() {
+function on_mouseout_plotbars() {
     var selectedThing = d3.select(this);
     selectedThing.style("fill", map_color(selectedThing.datum()[1]) );
     var zipId = selectedThing.datum()[0];
@@ -592,9 +692,12 @@ function my_mouseout_function() {
     reset_highlight(topLayer);
 }
 
-//d = dataValue,  i = elementNumber (starts at 0 for first bar)
-function calling_to_see_the_params(d,i) {
-    return "translate(" + spaceOnLeft + "," + (i * (barHeight+gapBetweenGroups) + (0.5 * barHeight)) + ")";
+function on_click_plotbars() {
+    var selectedThing = d3.select(this);
+    var zipId = selectedThing.datum()[0];
+    var activeOverlay = activeOverlays[0];
+    var topLayer = leafletLayerMapping[zipId][activeOverlay];
+    zoom_to_feature(topLayer);
 }
 
 function update_window_resize() {
@@ -602,36 +705,25 @@ function update_window_resize() {
         return;
 
     var plotRef = d3.select("#d3-plot");
-
-    plotWidth = plotRef.node().getBoundingClientRect().width - spaceOnLeft - spaceOnRight;
+    var svgRect = plotRef.node().getBoundingClientRect();
+    svgHeight = svgRect.height;
+    svgWidth = svgRect.width;
+    plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
     x_scale.range([0, plotWidth]);
-    plotRef.selectAll(".plot-bars").attr("width", function(d) { return x_scale(d[1]); });
-    plotRef.selectAll(".text-values").attr("x", text_values_attr_x);
+    plotRef.selectAll(".plot-bars")
+        .attr("width", function(d) { return x_scale(d[1]); });
+    plotRef.selectAll(".text-values")
+        .attr("x", text_values_attr_x);
+    plotRef.select(".scroll-area-bot")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight*0.25)
+        .attr("transform", 'translate(0,'+svgHeight*0.75+')');
+    plotRef.select(".scroll-area-top")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight*0.25)
+        .attr("transform", 'translate(0,0)');
 }
 d3.select(window).on('resize.updatesvg', update_window_resize);
 
 
-//calculate area from coordinates. math
-//coordinates for a geojson object are an array of polygons ('islands' are separate polygons)
-//I've removed negative spaces ('holes') in pre-processing, so don't need to worry about that
-// ignoring negative holes will make some areas wrong, but it makes this calculation simpler
-function calc_geodesic_area(coords) {
-    var area = 0.0,
-        deg2rad = Math.PI/180,
-        rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137  //it varies, so more than like 2/3 sigfigs is not justifiable
-        polygon, ptCnt, p1, p2;
 
-    for (var polyNo=0; polyNo<coords.length; polyNo++) {
-        polygon = coords[polyNo]
-        ptCnt = polygon.length;
-        if (ptCnt > 2) {
-            for (var ptNo=0; ptNo<ptCnt; ptNo++) {
-                p1 = polygon[ptNo];
-                p2 = polygon[ (ptNo+1) % ptCnt ];
-                area += ((p2[0] - p1[0]) * deg2rad) * (2 + Math.sin(p1[1] * deg2rad) + Math.sin(p2[1] * deg2rad));
-            }
-        }
-    }
-
-    return Math.abs(area*rEarth*rEarth / 2.0);
-}
