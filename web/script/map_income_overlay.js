@@ -1,3 +1,5 @@
+var NmMap = {};  //make a namespace for each file?
+
 var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create config/config.js and set
 var LMap = L.map('leaflet-map');  // big L is leaflet
 
@@ -21,19 +23,10 @@ var layerDark = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{fo
     format: 'png'
 }).addTo(LMap);
 
-//      //this guy takes a little longer to load maybe
-//		var layerSat = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapBoxKey, {
-//			maxZoom: 13,
-//			minZoom: 9,
-//			attribution: 'mapbox.com',
-//			id: 'mapbox.satellite'
-//		}).addTo(LMap);
-
 //unnecessary to have multiple layers here. just to see/show how baselayers works
 var baseLayers = {
     "light": layerLight,
     "dark": layerDark
-    //,"sat": layerSat
 };
 
 var activeOverlays = [];
@@ -197,21 +190,9 @@ function round_sig_figs(val, sigFigs=3, trailZeros=false) {
 
 //these are standard labels defined by census bureau
 //the income dataset is from ACS (American Community Survey) ref#: S1901 (from 2016, 5year average ['12-'16] estimates)
-//HC01_EST_VC01: Households; Estimate; Total
-//HC01_EST_VC02: Households; Estimate; Less than $10,000
-//HC01_EST_VC03: Households; Estimate; $10,000 to $14,999
-//HC01_EST_VC04: Households; Estimate; $15,000 to $24,999
-//HC01_EST_VC05: Households; Estimate; $25,000 to $34,999
-//HC01_EST_VC06: Households; Estimate; $35,000 to $49,999
-//HC01_EST_VC07: Households; Estimate; $50,000 to $74,999
-//HC01_EST_VC08: Households; Estimate; $75,000 to $99,999
-//HC01_EST_VC09: Households; Estimate; $100,000 to $149,999
-//HC01_EST_VC10: Households; Estimate; $150,000 to $199,999
-//HC01_EST_VC11: Households; Estimate; $200,000 or more
-//HC01_EST_VC13: Households; Estimate; Median income (dollars)
-//HC01_EST_VC15: Households; Estimate; Mean income (dollars)
-//HC01_EST_VC18: Households; Estimate; PERCENT IMPUTED - Household income in the past 12 months
+//could maybe load from data/income_descriptions.json
 var keyDefs = {
+//HC01_EST_VC01: Households; Estimate; Total
     'HC01_EST_VC02': 'Less than $10,000',
     'HC01_EST_VC03': '$10,000 to $14,999',
     'HC01_EST_VC04': '$15,000 to $24,999',
@@ -222,6 +203,8 @@ var keyDefs = {
     'HC01_EST_VC09': '$100,000 to $149,999',
     'HC01_EST_VC10': '$150,000 to $199,999',
     'HC01_EST_VC11': '$200,000 or more'
+//HC01_EST_VC13: Households; Estimate; Median income (dollars)
+//HC01_EST_VC15: Households; Estimate; Mean income (dollars)
 };
 
 
@@ -237,18 +220,17 @@ var zipBoundSrc = 'data/cb_2017_us_zcta510_500k_IL.json';
 //load the interesting data and zip code boundaries.
 $(document).ready(function() {
     $.getJSON(zipIncomeSrc, function(zipIncomeJson) {
-        //tempIncome = zipIncomeJson;
-        //calc_colormap_scale(zipIncomeVals);
-
         $.getJSON(zipBoundSrc, function(zipBoundJson) {
-            //
+            //filter and copy over json data + add some computed values
+            //zipBounds has only data for 1 state. zipIncome has every zip, so use keys in bounds to filter income
             for (var featureId in zipBoundJson.features) {
                 var zipId = zipBoundJson.features[featureId].properties.zip;
                 zipIncomeVals[zipId] = zipIncomeJson[zipId];
                 zipIncomeVals[zipId]['area'] = calc_geodesic_area(zipBoundJson.features[featureId].geometry.coordinates);
                 zipIncomeVals[zipId]['house_density'] = zipIncomeVals[zipId]['HC01_EST_VC01']/zipIncomeVals[zipId]['area'];
             }
-            calc_colormap_scale(zipIncomeVals);
+
+            calc_colormap_scale();
 
             geojsonZipData = L.geoJson(zipBoundJson, {
                 style: style_region,
@@ -258,17 +240,19 @@ $(document).ready(function() {
             activeOverlays.push('Mean Income'); //the addTo above doesn't trigger LMap.overlayadd, so add manually
 
             //pop (households) is same geojson but we'll color it differently
+            //seems plausible to manually handle the color and only have 1 geoJson dataset (boundary data is a few MB)
             geojsonZipDataPop = L.geoJson(zipBoundJson, {
                 style: style_region_pop,
                 onEachFeature: on_each_feature_pop
             });
 
+            //add the second layer button in upper right to toggle pop/inc
             var overlays = {
                 "Mean Income": geojsonZipData,
                 "Population": geojsonZipDataPop
             };
+            L.control.layers(null, overlays).addTo(LMap);  //add just the overlay, no baseLayer (already done elsewhere)
 
-            L.control.layers(null, overlays).addTo(LMap);  //add just the overlay, no baseLayer(already done above)
             add_d3_plot();  //add the bar plot on right. only requires the income data
             mapLegend.addTo(LMap);  //add legend after we load the data and know what scale to use
         });
@@ -276,7 +260,7 @@ $(document).ready(function() {
 });
 
 
-var popup = L.popup({autoPan: false, className: 'info'});
+var hoverPopup = L.popup({autoPan: false, className: 'info'});
 var regionId, regionElement;  //keeps tract of the currently active/selected region so we know when that changes
 
 var leafletLayerMapping = {};
@@ -330,23 +314,22 @@ function highlight_feature(leafletLayer) {
     var locNE = leafletLayer['_bounds']['_northEast'];
     var locSW = leafletLayer['_bounds']['_southWest'];
     var popupLoc = {'lat': locNE.lat, 'lng': (locNE.lng+locSW.lng)/2.0};
-    popup.setLatLng(popupLoc);  //boundary of feature layer, top-center
-    popup.setContent(contentStr);
-    popup.openOn(LMap);
+    hoverPopup.setLatLng(popupLoc);  //boundary of feature layer, top-center
+    hoverPopup.setContent(contentStr);
+    hoverPopup.openOn(LMap);
 
     //highlight boundary in thick green
     leafletLayer.setStyle({
         weight: 9,
         color: '#693',
-        dashArray: '',
-        //fillOpacity: 0.7
+        dashArray: ''
     });
 }
 
 function on_mouseout_feature(mouseEvent) { reset_highlight(mouseEvent.target); }
 function reset_highlight(leafletLayer) {
     leafletLayer.setStyle(leafletLayer.defaultOptions.style(leafletLayer.feature));
-    LMap.closePopup();
+    hoverPopup.closePopup();
     regionId = null;
 }
 
@@ -405,7 +388,7 @@ function zoom_to_feature(leafletLayer) {
 var controlInfo = L.control();
 controlInfo.isVisible = false;  //can i do this?
 controlInfo.onAdd = function (e) {
-    this._div = L.DomUtil.create('div', 'info'); //'my-mini-plot');
+    this._div = L.DomUtil.create('svg', 'plot-info'); //'my-mini-plot');
     return this._div;
 };
 
@@ -500,230 +483,24 @@ LMap.on('locationfound', on_location_found);
 LMap.on('locationerror', on_location_error);
 LMap.locate({setView: true});
 
+var locMarker, locCircle;
 function on_location_found(e) {
     var uncertaintyRadius = e.accuracy / 2;
-    //e.latlng = [43.03, -89.55];
-    L.marker(e.latlng).addTo(LMap).bindPopup('location uncertainty = ±' + uncertaintyRadius + 'm').openPopup();
-    L.circle(e.latlng, uncertaintyRadius).addTo(LMap);
+    locMarker = L.marker(e.latlng, {opacity:.75, title: e.latlng});
+    locMarker.addTo(LMap);
+    var locPopup = L.popup({opacity:.5});
+    locPopup.setContent('location uncertainty = ±' + uncertaintyRadius + 'm');
+    locMarker.bindPopup(locPopup).openPopup();
+    locCircle = L.circle(e.latlng, uncertaintyRadius);
+    locCircle.addTo(LMap);
     LMap.setView(e.latlng, 9);
+    window.setTimeout(function() {
+        locMarker.remove();
+        locCircle.remove();
+    }, 3000);
 }
 
 // can't or refused to get location -> go to madison
 function on_location_error(e) {
-    LMap.setView([43.03, -89.55], 9);
+    LMap.setView([41.7, -87.9], 9);
 }
-
-
-d3.selection.prototype.moveToBack = function() {
-    return this.each(function() {
-        this.parentNode.insertBefore(this, this.parentNode.firstChild);
-    });
-};
-
-
-var plotWidth = 300,
-    barHeight = 12,
-    spaceOnLeft = 38,
-    spaceOnRight = 4,
-    labelEndToRectStart = 4,
-    gapBetweenGroups = .5,
-    zipCount, maxPlotVal,
-    x_scale, y_scale,
-    scrollRow=0,
-    svgHeight, svgWidth;
-
-function add_d3_plot() {
-    var plotObjs = [];
-    for (var zipId in zipIncomeVals) {
-        var intVal = +zipIncomeVals[zipId][keyToDisplay];
-	    if (isNaN(intVal))
-	        intVal = 0;
-        plotObjs.push([zipId, intVal]);
-        if (plotObjs.length >= 250)
-            break;
-    }
-    zipCount = plotObjs.length;
-    maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
-    plotObjs.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotObjs by second col (income, desc)
-
-    var plotHeight = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;
-    var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
-    svgWidth = divRect.width;
-    svgHeight = divRect.height;
-    plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
-
-    //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
-    x_scale = d3.scale.linear()
-        .domain([0, maxPlotVal])
-        .range([0, plotWidth]);
-
-    y_scale = d3.scale.linear()
-        .range([plotHeight, 0]);
-
-    var plotChart = d3.select("#d3-plot")
-        .attr("width", plotWidth)
-        .attr("height", plotHeight);
-
-    //
-    var plotBars = plotChart.selectAll("g")
-        .data(plotObjs)   //data here
-        .enter().append("g")
-            .attr("transform", plot_elem_transform);
-
-    plotBars.append("rect")
-        .attr("class", "plot-bars")
-        .attr("fill", function(d,i) { return map_color(d[1]); })
-        .attr("width", function(d) { return x_scale(d[1]); })
-        .attr("height", barHeight)
-        .on({"mouseover": on_mouseover_plotbars, "mouseout": on_mouseout_plotbars, "click": on_click_plotbars});
-
-    //the text inside the bar that shows the value
-    plotBars.append("text")
-        .attr("class", "text-values")
-        .attr("x", text_values_attr_x)
-        .attr("y", barHeight/2)
-        //.attr("fill", "#fff")
-        .attr("dy", ".4em")
-        .text(function(d) { return '$'+d[1].toLocaleString(); });
-
-    //the y-axis label showing the zip code
-    plotBars.append("text")
-        .attr("class", "label")
-        .attr("x", function(d) { return - labelEndToRectStart; })
-        .attr("y", barHeight / 2)
-        .attr("dy", ".35em")
-        .text(function(d,i) { return d[0]; });
-
-    //define a line for the y-axis, maybe with some tick marks
-    var y_axis = d3.svg.axis()  //TODO fix axis scrolling with everything else
-        .scale(y_scale)
-        .tickFormat('')
-        .tickSize(0)
-        .orient("left");  //put tick left of axis
-
-    //draw/update the y-axis?
-    plotChart.append("g")
-      .attr("class", "y-axis")
-      .attr("transform", "translate(" + spaceOnLeft + ", " + gapBetweenGroups + ")")
-      .call(y_axis);
-
-    //callbacks for interactivity with the map side TODO probably should be appended to other plot-bars stuff
-//    d3.selectAll(".plot-bars").on("mouseover", on_mouseover_plotbars);
-//    d3.selectAll(".plot-bars").on("mouseout", on_mouseout_plotbars);
-//    d3.selectAll(".plot-bars").on("click", on_click_plotbars);
-
-    plotChart.append('rect')
-        .attr("class", 'scroll-area-bot')
-        .attr("width", svgWidth)
-        .attr("height", svgHeight*0.25)
-        .attr("transform", 'translate(0, '+svgHeight*0.75+')')
-        .attr("fill", 'rgba(0,255,255,0.1)')  // == 'transparent'  TODO non-zero alpha for debugging
-        .on('click', on_click_scroll_down)
-        .moveToBack();
-
-    plotChart.append('rect')
-        .attr("class", 'scroll-area-top')
-        .attr("width", svgWidth)
-        .attr("height", svgHeight*0.25)
-        .attr("transform", 'translate(0, 0)') //not needed
-        .attr("fill", 'rgba(255,0,255,0.1)')  // == 'transparent'
-        .on('click', on_click_scroll_up)
-        .moveToBack();
-}
-
-function plot_elem_transform(datum, index) {
-    var yPos = (index-scrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
-    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";
-}
-
-var oldScrollRow=0;
-function plot_elem_transform_old(datum, index) {
-    var yPos = (index-oldScrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
-    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";
-}
-
-
-function on_click_scroll_down(arg1, arg2) {
-    var maxScroll = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenGroups));
-    if (scrollRow == maxScroll)
-        return;
-
-    scrollRow = Math.min(scrollRow+20, maxScroll);
-    d3.select("#d3-plot").selectAll("g")
-        .attr("transform", plot_elem_transform_old) //transition from state before .transition to state after?
-        .transition().duration(500)
-            .attr("transform", plot_elem_transform);
-
-    oldScrollRow = scrollRow;
-}
-
-function on_click_scroll_up(arg1, arg2) {
-    if (scrollRow == 0)
-        return;
-
-    scrollRow = Math.max(scrollRow-20, 0);
-    d3.select("#d3-plot").selectAll("g")
-        .attr("transform", plot_elem_transform_old)
-        .transition().duration(500)
-            .attr("transform", plot_elem_transform);
-
-    oldScrollRow = scrollRow;
-}
-
-function text_values_attr_x(d) {
-    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
-}
-
-function on_mouseover_plotbars() {
-    var selectedThing = d3.select(this);
-    selectedThing.style("fill", "#693");
-    var zipId = selectedThing.datum()[0];
-    var activeOverlay = activeOverlays[0];
-    var topLayer = leafletLayerMapping[zipId][activeOverlay];
-    highlight_feature(topLayer);
-}
-
-function on_mouseout_plotbars() {
-    var selectedThing = d3.select(this);
-    selectedThing.style("fill", map_color(selectedThing.datum()[1]) );
-    var zipId = selectedThing.datum()[0];
-    var activeOverlay = activeOverlays[0];
-    var topLayer = leafletLayerMapping[zipId][activeOverlay];
-    reset_highlight(topLayer);
-}
-
-function on_click_plotbars() {
-    var selectedThing = d3.select(this);
-    var zipId = selectedThing.datum()[0];
-    var activeOverlay = activeOverlays[0];
-    var topLayer = leafletLayerMapping[zipId][activeOverlay];
-    zoom_to_feature(topLayer);
-}
-
-function update_window_resize() {
-    if (!x_scale)
-        return;
-
-    var plotRef = d3.select("#d3-plot");
-    var svgRect = plotRef.node().getBoundingClientRect();
-    svgHeight = svgRect.height;
-    svgWidth = svgRect.width;
-    plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
-    x_scale.range([0, plotWidth]);
-    plotRef.selectAll(".plot-bars")
-        .attr("width", function(d) { return x_scale(d[1]); });
-    plotRef.selectAll(".text-values")
-        .attr("x", text_values_attr_x);
-    plotRef.select(".scroll-area-bot")
-        .attr("width", svgWidth)
-        .attr("height", svgHeight*0.25)
-        .attr("transform", 'translate(0,'+svgHeight*0.75+')');
-    plotRef.select(".scroll-area-top")
-        .attr("width", svgWidth)
-        .attr("height", svgHeight*0.25)
-        .attr("transform", 'translate(0,0)');
-}
-d3.select(window).on('resize.updatesvg', update_window_resize);
-
-
-

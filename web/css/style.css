@@ -2,8 +2,11 @@
 	width: 70%;
 	height: 100%;
 }
-
-
+.my-div-icon {
+    fill: #090;
+    font: 12px sans-serif;
+	color: #555;
+}
 .info {
 	padding: 0px 0px;
 	font: 14px Arial, Helvetica, sans-serif;
@@ -16,7 +19,6 @@
 	margin: 0 0 16px;
 	color: #555;
 }
-
 .legend {
 	text-align: left;
 	line-height: 18px;
@@ -41,47 +43,37 @@
 
 
 
-.d3-plot-class {
-	width: 30%;
-	height: 100%;
-	background-color: #000;
-	color: #fff;
-	Font-family: Helvetica;
-	font-size: 32pt;
-	text-align: center;
-}
 
-.d3-plot-class {
+#d3-plot {
     background-color: #333;
     height: 100%;
     width: 100%;
 }
-
-#d3-plot .text-values {
+#d3-plot .text-value {
   fill: #fff;
   font: 10px sans-serif;
   text-anchor: end;
 }
-
-.d3-plot-class .label {
+#d3-plot .text-label {
   fill: #fff;
   font: 11px sans-serif;
   text-anchor: end;
 }
-
-.d3-plot-class .label : hover {
-  fill: #00f;
+/* why doesn't this work...?
+#d3-plot .text-label:hover {
+    background-color: yellow;
+    background-color: red;
 }
-
+*/
 .y-axis path,
 .y-axis line {
   fill: none;
   stroke: #fff;
   shape-rendering: crispEdges;
 }
-
-.my-div-icon {
-    fill: #090;
-    font: 12px sans-serif;
-	color: #555;
+.scroll-arrow {
+    fill: none;
+    /*stroke: rgba(0,0,0,.25);*/
+    stroke-width: 6;
+    stroke-linecap: round;
 }

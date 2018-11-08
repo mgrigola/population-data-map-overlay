@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>map overlay</title>
+	<title>Map Overlay</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,15 +11,16 @@
 	<link rel="stylesheet" href="/css/style.css" />
 </head>
 
-<body>
+<body style="margin:2; padding:0">
 	<table cellspacing="0" cellpadding="0" margin="0" border="0" height="100%" width="100%">
 		<tr>
 			<td id="leaflet-map" ></td>
-			<td><svg class="d3-plot-class" id="d3-plot">Text here?</svg></td>  <!-- id="-id"  -->
+			<td><svg id="d3-plot"></svg></td>  <!-- class="d3-plot-class" -->
 		</tr>
 	</table>
 
 	<script src="/config/keys.js"></script>  						<!-- use your own mapbox key -->
 	<script src="/script/map_income_overlay.js"></script>
+	<script src="/script/bar_plot.js"></script>
 </body>
 </html>
