@@ -166,11 +166,11 @@ function calc_geodesic_area(coords) {
 //  This is like toPrecision, but doesn't do scientific notation
 //given value and number of significant figures, returns the value rounded appropriately (as float)
 //something like 1.00 will present as 1. rounds -1.5 to -2 (away from 0)
-function round_sig_figs(val, sigFigs=3, trailZeros=false) {
+function round_sig_figs(val, sigFigs=3, trailZeros=false, round_func=Math.round) {
     var sign = Math.sign(val);
     var logTen = Math.floor(Math.log10(sign*val));
     var scale = Math.pow(10.0, sigFigs - logTen - 1);
-    var noDecVal = sign*Math.round(sign*val*scale);
+    var noDecVal = sign*round_func(sign*val*scale);
     var roundedVal = noDecVal / scale;
     if (!trailZeros) return roundedVal
 
@@ -193,20 +193,29 @@ function round_sig_figs(val, sigFigs=3, trailZeros=false) {
 //could maybe load from data/income_descriptions.json
 var keyDefs = {
 //HC01_EST_VC01: Households; Estimate; Total
-    'HC01_EST_VC02': 'Less than $10,000',
-    'HC01_EST_VC03': '$10,000 to $14,999',
-    'HC01_EST_VC04': '$15,000 to $24,999',
-    'HC01_EST_VC05': '$25,000 to $34,999',
-    'HC01_EST_VC06': '$35,000 to $49,999',
-    'HC01_EST_VC07': '$50,000 to $74,999',
-    'HC01_EST_VC08': '$75,000 to $99,999',
-    'HC01_EST_VC09': '$100,000 to $149,999',
-    'HC01_EST_VC10': '$150,000 to $199,999',
-    'HC01_EST_VC11': '$200,000 or more'
+    'HC01_EST_VC02': '$10k -',
+    'HC01_EST_VC03': '$10-15k',
+    'HC01_EST_VC04': '$15-25k',
+    'HC01_EST_VC05': '$25-35k',
+    'HC01_EST_VC06': '$35-50k',
+    'HC01_EST_VC07': '$50-75k',
+    'HC01_EST_VC08': '$75-80k',
+    'HC01_EST_VC09': '$100-150k',
+    'HC01_EST_VC10': '$150-200k',
+    'HC01_EST_VC11': '$200k +'
 //HC01_EST_VC13: Households; Estimate; Median income (dollars)
 //HC01_EST_VC15: Households; Estimate; Mean income (dollars)
 };
-
+var keyList = [['HC01_EST_VC02', 'Less than $10,000'],
+        ['HC01_EST_VC03', '$10,000 to $14,999'],
+        ['HC01_EST_VC04', '$15,000 to $24,999'],
+        ['HC01_EST_VC05', '$25,000 to $34,999'],
+        ['HC01_EST_VC06', '$35,000 to $49,999'],
+        ['HC01_EST_VC07', '$50,000 to $74,999'],
+        ['HC01_EST_VC08', '$75,000 to $99,999'],
+        ['HC01_EST_VC09', '$100,000 to $149,999'],
+        ['HC01_EST_VC10', '$150,000 to $199,999'],
+        ['HC01_EST_VC11', '$200,000 or more']];
 
 var keyToDisplay = 'HC01_EST_VC15';
 var keyToDisplayPop = 'house_density'; //'HC01_EST_VC01';
@@ -388,9 +397,19 @@ function zoom_to_feature(leafletLayer) {
 var controlInfo = L.control();
 controlInfo.isVisible = false;  //can i do this?
 controlInfo.onAdd = function (e) {
-    this._div = L.DomUtil.create('svg', 'plot-info'); //'my-mini-plot');
+    this._div = L.DomUtil.create('div', 'pie-box'); //'my-mini-plot');
+    //this._div.innerHTML = '<h4>Detail<h4>';
+
     return this._div;
 };
+
+var pieRad = 150, pieHeight = 300, pieWidth = 300;
+var pie_color_map = d3.scale.category20c();
+var arcPath = d3.svg.arc().outerRadius(pieRad).innerRadius(pieRad/4); //defines svg path for a pie slice assumed centered at origin?
+function debug_arc_path(a,b,c,d) {
+    var val = arcPath(a,b,c,d);
+    return val;
+}
 
 controlInfo.update_info = function(leafletLayer) {
     if  (!leafletLayer)
@@ -398,15 +417,60 @@ controlInfo.update_info = function(leafletLayer) {
 
     var props = leafletLayer.feature.properties;
     var regionIncome = zipIncomeVals[props.zip];
+    var incomeData = [];
 
-    //I'm sure this is not the way to do this... TODO
-    var detailStr = '<h4>Detail</h4><table>';
-    for (var key in keyDefs) {
-        detailStr += '<tr><td>'+keyDefs[key]+'</td><td>'+regionIncome[key]+'</td></tr>';
+    for (key in keyDefs) {
+        incomeData.push({'label':key, 'value':zipIncomeVals[props.zip][key]});
     }
-    detailStr += '</table>'
-    this._div.innerHTML = detailStr;
+    // for (var idx=0; idx<keyList.length; idx++) {
+    //     incomeData.push({'label':keyList[idx][0], 'value':zipIncomeVals[props.zip][keyList[idx][0]]});
+    // }
+
+    var pieThing = d3.select('.pie-box');
+    var pieThing2 = pieThing.append('svg')
+        .data([incomeData])
+        .attr("width", pieWidth)
+        .attr("height", pieHeight)
+        .append("g")
+            .attr("transform", 'translate('+(pieWidth/2)+','+(pieHeight/2)+')');
+
+    var pieLayout = d3.layout.pie()
+        .value(pie_layout_func)
+        .sort(null);
+    
+    var whatsthis = pieLayout(incomeData);
+    var pieSlices = pieThing2.selectAll('g.pie-slice')
+        .data(pieLayout)
+        .enter().append('g')
+            .attr("class", 'pie-slice');
+    
+    pieSlices.append('path')
+        .attr("fill", pie_color_func)
+        .attr("d", debug_arc_path);
+
+    pieSlices.filter(d => (d.endAngle-d.startAngle)*pieRad/2>30).append('text')
+        .attr('class', 'pie-label')
+        .attr("transform", pie_text_transform)
+        .text(pie_text_func);
 };
+
+function pie_text_func(datum, index) {
+    return keyDefs[datum.data.label];
+}
+
+function pie_layout_func(datum, index) {
+    return datum.value;
+}
+
+function pie_color_func(datum, index) {
+    return pie_color_map(index);
+}
+
+function pie_text_transform(datum, index) {
+    datum.innerRadius = pieRad/2;
+    datum.outerRadius = pieRad;
+    return 'translate('+arcPath.centroid(datum)+')';
+}
 
 controlInfo.clear_info = function(mouseEvent) {
     if (controlInfo.isVisible) {
@@ -438,12 +502,12 @@ mapLegend.onAdd = function (_) {
 
 
 //manually defining a colormap function. I'm sure there's a cleaner way
-var colormapMinVal = 10000, colormapMaxVal = 100000;  //default values until we load data
-var colormapMinPop = 10000, colormapMaxPop = 100000;  //some ugly copying of the income stuff for pop
-var legendGradeScale = 1000;
+// var colormapMinVal = 10000, colormapMaxVal = 100000;  //default values until we load data
+// var colormapMinPop = 10000, colormapMaxPop = 100000;  //some ugly copying of the income stuff for pop
+// var legendGradeScale = 1000;
+var colormapMinVal, colormapMaxVal, colormapMinValPop, colormapMaxValPop;  //some ugly copying of the income stuff for pop
 function calc_colormap_scale() {
-    colormapMinVal = 999999, colormapMaxVal = 0;
-    colormapMinPop = 999999, colormapMaxPop = 0;
+    colormapMinVal = 999999, colormapMaxVal = 0, colormapMinPop = 999999, colormapMaxPop = 0;
     for (zipId in zipIncomeVals) {
         var val = parseInt(zipIncomeVals[zipId][keyToDisplay]);
         if (val < colormapMinVal)  colormapMinVal = val;
@@ -453,11 +517,16 @@ function calc_colormap_scale() {
         if (pop < colormapMinPop)  colormapMinPop = pop;
         if (pop > colormapMaxPop)  colormapMaxPop = pop;
     }
-    colormapMinVal = Math.ceil(colormapMinVal/legendGradeScale)*legendGradeScale;
-    colormapMaxVal = Math.floor(colormapMaxVal/legendGradeScale)*legendGradeScale;
 
-    colormapMinPop = Math.ceil(colormapMinPop/legendGradeScale)*legendGradeScale;
-    colormapMaxPop = Math.floor(colormapMaxPop/legendGradeScale)*legendGradeScale;
+    colormapMinVal = round_sig_figs(colormapMinVal, 1, false, Math.ceil);
+    colormapMaxVal = round_sig_figs(colormapMaxVal, 1, false, Math.floor);
+    colormapMinValPop = round_sig_figs(colormapMinValPop, 1, false, Math.ceil);
+    colormapMaxValPop = round_sig_figs(colormapMaxValPop, 1, false, Math.floor);
+    // colormapMinVal = Math.ceil(colormapMinVal/legendGradeScale)*legendGradeScale;
+    // colormapMaxVal = Math.floor(colormapMaxVal/legendGradeScale)*legendGradeScale;
+
+    // colormapMinPop = Math.ceil(colormapMinPop/legendGradeScale)*legendGradeScale;
+    // colormapMaxPop = Math.floor(colormapMaxPop/legendGradeScale)*legendGradeScale;
 }
 
 function rgb_2_str(r,g,b) {

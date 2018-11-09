@@ -9,7 +9,7 @@
 }
 .info {
 	padding: 0px 0px;
-	font: 14px Arial, Helvetica, sans-serif;
+	font: 14px sans-serif;
 	background: white;
 	background: rgba(255,255,255,0.8);
 	box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -40,8 +40,17 @@
 	color: #000;
 	text-align: center;
 }
-
-
+.pie-box {
+	background-color: rgba(0,0,0,0.5);
+	border-radius: 10px;
+	font: 16px sans-serif;
+	font-weight: bold;
+}
+.pie-label {
+	font: 9px sans-serif;
+	text-anchor: middle;
+	display: inline-block;
+}
 
 
 #d3-plot {
@@ -76,4 +85,5 @@
     /*stroke: rgba(0,0,0,.25);*/
     stroke-width: 6;
     stroke-linecap: round;
+    stroke-linejoin: round;
 }

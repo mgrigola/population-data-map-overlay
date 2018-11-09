@@ -107,8 +107,8 @@ function add_d3_plot() {
         .attr("d", lineFunction(arrowDataBot))
         .attr("class", 'scroll-arrow')
         .attr("stroke", 'rgba(0,0,0,.2)')
-        .style("stroke-linecap", 'round')
-        .style("stroke-linejoin", 'round')
+//        .style("stroke-linecap", 'round')
+//        .style("stroke-linejoin", 'round')
     // the clickable rectangular area that actually triggers scrolling, slightly larger than arrow and transparent
     scrollOverlayBot.append("rect")
         .attr("width", 2*arrowWidth+2*arrowPad)
@@ -119,14 +119,14 @@ function add_d3_plot() {
 
     var scrollOverlayTop = plotChart.append("g")
         .attr("class", "scroll-area-top")
-        .attr("transform", 'translate('+(0.5*svgWidth-arrowWidth-arrowPad)+','+(arrowPad+arrowEdgePad)+')');
+        .attr("transform", translate_scroll_area_top);
     // the scroll arrow
     scrollOverlayTop.append("path")
         .attr("d", lineFunction(arrowDataTop))
         .attr("class", 'scroll-arrow')
         .attr("stroke", 'rgba(0,0,0,.2)')
-        .style("stroke-linecap", 'round')
-        .style("stroke-linejoin", 'round')
+//        .style("stroke-linecap", 'round')
+//        .style("stroke-linejoin", 'round')
     // the clickable rectangular area that actually triggers scrolling, slightly larger than arrow and transparent
     scrollOverlayTop.append("rect")
         .attr("width", 2*arrowWidth+2*arrowPad)
@@ -136,8 +136,15 @@ function add_d3_plot() {
         .on({"click": on_click_scroll_up, "mouseover": on_mouseover_scroll_up, "mouseout": on_mouseout_scroll_up});
 }
 
+function text_values_attr_x(d) {
+    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
+}
+
 function translate_scroll_area_bot() {
     return 'translate('+(0.5*svgWidth-arrowWidth-arrowPad)+','+(svgHeight-arrowHeight-arrowPad-arrowEdgePad)+')';
+}
+function translate_scroll_area_top() {
+    return 'translate('+(0.5*svgWidth-arrowWidth-arrowPad)+','+(arrowPad+arrowEdgePad)+')';
 }
 
 // all these next mouse* functions are just to make the neat little highlight effect before scrolling
@@ -178,11 +185,6 @@ function on_mouseout_scroll_up() {
         .attr("stroke", 'rgba(0,0,0,.2)');
 }
 
-function plot_elem_transform(datum, index) {
-    var yPos = (index-scrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
-    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
-}
-
 function on_click_scroll_down() {
     var maxScroll = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenGroups));
     if (scrollRow == maxScroll)
@@ -199,14 +201,14 @@ function on_click_scroll_up() {
     draw_animate_scroll();
 }
 
+function plot_elem_transform(datum, index) {
+    var yPos = (index-scrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
+    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
+}
 function draw_animate_scroll() {
     d3.selectAll('.plot-elems')
         .transition().duration(200)
             .attr("transform", plot_elem_transform);
-}
-
-function text_values_attr_x(d) {
-    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
 }
 
 function on_mouseover_plotbar() {
@@ -251,7 +253,8 @@ function update_window_resize() {
         .attr("x", text_values_attr_x);
     plotRef.select(".scroll-area-bot")
         .attr("transform", translate_scroll_area_bot);
-
+    plotRef.select(".scroll-area-top")
+        .attr("transform", translate_scroll_area_top);
 }
 d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
 
