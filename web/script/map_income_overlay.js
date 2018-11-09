@@ -199,7 +199,7 @@ var keyDefs = {
     'HC01_EST_VC05': '$25-35k',
     'HC01_EST_VC06': '$35-50k',
     'HC01_EST_VC07': '$50-75k',
-    'HC01_EST_VC08': '$75-80k',
+    'HC01_EST_VC08': '$75-100k',
     'HC01_EST_VC09': '$100-150k',
     'HC01_EST_VC10': '$150-200k',
     'HC01_EST_VC11': '$200k +'
@@ -382,10 +382,13 @@ function on_click_feature(mouseEvent) { zoom_to_feature(mouseEvent.target); }
 function zoom_to_feature(leafletLayer) {
     var bounds = leafletLayer.getBounds();
     LMap.fitBounds(bounds, {paddingTopLeft:[150,150], paddingBottomRight:[150,0]});
-    if (!controlInfo.isVisible) {
-        controlInfo.addTo(LMap);
-        controlInfo.isVisible = true;
-    }
+    
+    // if (!controlInfo.isVisible) {
+    //     controlInfo.addTo(LMap);
+    //     controlInfo.isVisible = true;
+    // }
+    controlInfo.clear_info();
+    controlInfo.addTo(LMap);
 
     controlInfo.update_info(leafletLayer);
     LMap.addOneTimeEventListener('mousedown', controlInfo.clear_info);  // "hide" the info box when user clicks elsewhere
@@ -398,13 +401,14 @@ var controlInfo = L.control();
 controlInfo.isVisible = false;  //can i do this?
 controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'pie-box'); //'my-mini-plot');
-    //this._div.innerHTML = '<h4>Detail<h4>';
+    this._div.innerHTML = '<h4>Income Distribution in '+regionId+'</h4>';
 
     return this._div;
 };
 
 var pieRad = 150, pieHeight = 300, pieWidth = 300;
-var pie_color_map = d3.scale.category20c();
+var pieColorData;
+var pie_color_map = function(i) {return pieColorData[i]; };
 var arcPath = d3.svg.arc().outerRadius(pieRad).innerRadius(pieRad/4); //defines svg path for a pie slice assumed centered at origin?
 function debug_arc_path(a,b,c,d) {
     var val = arcPath(a,b,c,d);
@@ -414,6 +418,9 @@ function debug_arc_path(a,b,c,d) {
 controlInfo.update_info = function(leafletLayer) {
     if  (!leafletLayer)
         return;
+    
+    //controlInfo.clear_info();
+    d3.select('.pie-box.svg').remove();
 
     var props = leafletLayer.feature.properties;
     var regionIncome = zipIncomeVals[props.zip];
@@ -448,10 +455,16 @@ controlInfo.update_info = function(leafletLayer) {
         .attr("fill", pie_color_func)
         .attr("d", debug_arc_path);
 
-    pieSlices.filter(d => (d.endAngle-d.startAngle)*pieRad/2>30).append('text')
+    var slicesThatFitText = pieSlices.filter(d => (d.endAngle-d.startAngle)*pieRad/2>30)
+    slicesThatFitText.append('text') //newer syntax for defining a function? I like it
         .attr('class', 'pie-label')
         .attr("transform", pie_text_transform)
         .text(pie_text_func);
+        
+    slicesThatFitText.append('text')
+        .attr('class', 'pie-label-lower')
+        .attr("transform", pie_text_transform_lower)
+        .text(d => d.data.value+'%') //zipIncomeVals[props.zip]['HC01_EST_VC01']/100.0)
 };
 
 function pie_text_func(datum, index) {
@@ -467,9 +480,27 @@ function pie_color_func(datum, index) {
 }
 
 function pie_text_transform(datum, index) {
-    datum.innerRadius = pieRad/2;
+    datum.innerRadius = pieRad/1.5;
     datum.outerRadius = pieRad;
-    return 'translate('+arcPath.centroid(datum)+')';
+    var pt = arcPath.centroid(datum);
+    var halfAng = (datum.startAngle + datum.endAngle)/2.0
+    if ( halfAng > 1.57 && halfAng < 4.71)
+        pt[1] += 6;
+    else
+        pt[1] += 6;
+    return 'translate('+pt+')';
+}
+
+function pie_text_transform_lower(datum, index) {
+    datum.innerRadius = pieRad/1.5;
+    datum.outerRadius = pieRad;
+    var pt = arcPath.centroid(datum);
+    var halfAng = (datum.startAngle + datum.endAngle)/2.0
+    if ( halfAng > 1.57 && halfAng < 4.71)
+        pt[1] -= 6;
+    else
+        pt[1] -= 6;
+    return 'translate('+pt+')';
 }
 
 controlInfo.clear_info = function(mouseEvent) {
@@ -522,11 +553,7 @@ function calc_colormap_scale() {
     colormapMaxVal = round_sig_figs(colormapMaxVal, 1, false, Math.floor);
     colormapMinValPop = round_sig_figs(colormapMinValPop, 1, false, Math.ceil);
     colormapMaxValPop = round_sig_figs(colormapMaxValPop, 1, false, Math.floor);
-    // colormapMinVal = Math.ceil(colormapMinVal/legendGradeScale)*legendGradeScale;
-    // colormapMaxVal = Math.floor(colormapMaxVal/legendGradeScale)*legendGradeScale;
-
-    // colormapMinPop = Math.ceil(colormapMinPop/legendGradeScale)*legendGradeScale;
-    // colormapMaxPop = Math.floor(colormapMaxPop/legendGradeScale)*legendGradeScale;
+    pieColorData = [map_color(10000), map_color(12500), map_color(20000), map_color(30000), map_color(42500), map_color(62500), map_color(87500), map_color(125000), map_color(175000), map_color(999999)];
 }
 
 function rgb_2_str(r,g,b) {

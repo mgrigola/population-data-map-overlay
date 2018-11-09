@@ -41,17 +41,21 @@
 	text-align: center;
 }
 .pie-box {
-	background-color: rgba(0,0,0,0.5);
+	padding: 2px 2px;
+	background-color: rgba(255, 255, 255, 0.5);
 	border-radius: 10px;
 	font: 16px sans-serif;
-	font-weight: bold;
+	text-align: center;
 }
 .pie-label {
-	font: 9px sans-serif;
+	font: 12px sans-serif;
 	text-anchor: middle;
-	display: inline-block;
 }
-
+.pie-label-lower {
+	font: 12px sans-serif;
+	text-anchor: middle;
+	font-weight: 700;
+}
 
 #d3-plot {
     background-color: #333;
