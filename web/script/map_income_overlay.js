@@ -4,15 +4,15 @@ var mapBoxKey = configKeys.mapBoxApiKey; // place your mapbox key here or create
 var LMap = L.map('leaflet-map');  // big L is leaflet
 
 //the options for map styles
-var layerLight = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
-    accessToken: mapBoxKey,
-    maxZoom: 13,
-    minZoom: 7,
-    attribution: 'mapbox.com',
-    styleId: 'mapbox.light',
-    styleId: 'mapbox.light',
-    format: 'png'
-}).addTo(LMap);
+// var layerLight = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
+//     accessToken: mapBoxKey,
+//     maxZoom: 13,
+//     minZoom: 7,
+//     attribution: 'mapbox.com',
+//     styleId: 'mapbox.light',
+//     styleId: 'mapbox.light',
+//     format: 'png'
+// }).addTo(LMap);
 
 var layerDark = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{format}?access_token={accessToken}', {
     accessToken: mapBoxKey,
@@ -23,14 +23,14 @@ var layerDark = L.tileLayer('https://api.mapbox.com/v4/{styleId}/{z}/{x}/{y}.{fo
     format: 'png'
 }).addTo(LMap);
 
-//unnecessary to have multiple layers here. just to see/show how baselayers works
-var baseLayers = {
-    "light": layerLight,
-    "dark": layerDark
-};
+// //unnecessary to have multiple layers here. just to see/show how baselayers works
+// var baseLayers = {
+//     "light": layerLight,
+//     "dark": layerDark
+// };
 
 var activeOverlays = [];
-L.control.layers(baseLayers).addTo(LMap);
+//L.control.layers(baseLayers).addTo(LMap);
 L.control.scale().addTo(LMap);
 
 LMap.on('overlayadd', function(layersControlEvent) {
@@ -224,7 +224,7 @@ var keyToDisplayDescription = 'Mean Household Income ($)';
 var zipIncomeVals = {};
 var zipIncomeSrc = 'data/incomeDistribByZipcode.json';  //now with all the zips in US?
 var geojsonZipData;  //the zip code boundary coordinates stored in (geo)JSON format
-var zipBoundSrc = 'data/cb_2017_us_zcta510_500k_IL.json';
+var zipBoundSrc = 'data/cb_2017_us_zcta510_500k_CA.json';
 
 //load the interesting data and zip code boundaries.
 $(document).ready(function() {
@@ -304,6 +304,9 @@ function on_each_feature_pop(feature, layer) {
 
 function on_mouseover_feature(mouseEvent) { highlight_feature(mouseEvent.target); }
 function highlight_feature(leafletLayer) {
+    if (!leafletLayer) //dunno why this happens but sometimes it does...
+        return;
+
     var gjsnFeature = leafletLayer.feature;  //the geoJson feature (a region)
     var regionProps = gjsnFeature.properties;  //properties for the region (like id, whatever else is in the json file)
 
@@ -403,13 +406,21 @@ controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'pie-box'); //'my-mini-plot');
     this._div.innerHTML = '<h4>Income Distribution in '+regionId+'</h4>';
 
+    controlInfo.isVisible = true;
     return this._div;
+};
+
+controlInfo.clear_info = function(mouseEvent) {
+    if (controlInfo.isVisible) {
+        controlInfo.remove(LMap);
+        controlInfo.isVisible = false;
+    }
 };
 
 var pieRad = 150, pieHeight = 300, pieWidth = 300;
 var pieColorData;
 var pie_color_map = function(i) {return pieColorData[i]; };
-var arcPath = d3.svg.arc().outerRadius(pieRad).innerRadius(pieRad/4); //defines svg path for a pie slice assumed centered at origin?
+var arcPath = d3.arc().outerRadius(pieRad).innerRadius(pieRad/4); //defines svg path for a pie slice assumed centered at origin?
 function debug_arc_path(a,b,c,d) {
     var val = arcPath(a,b,c,d);
     return val;
@@ -441,7 +452,7 @@ controlInfo.update_info = function(leafletLayer) {
         .append("g")
             .attr("transform", 'translate('+(pieWidth/2)+','+(pieHeight/2)+')');
 
-    var pieLayout = d3.layout.pie()
+    var pieLayout = d3.pie()
         .value(pie_layout_func)
         .sort(null);
     
@@ -480,35 +491,28 @@ function pie_color_func(datum, index) {
 }
 
 function pie_text_transform(datum, index) {
-    datum.innerRadius = pieRad/1.5;
-    datum.outerRadius = pieRad;
-    var pt = arcPath.centroid(datum);
-    var halfAng = (datum.startAngle + datum.endAngle)/2.0
-    if ( halfAng > 1.57 && halfAng < 4.71)
-        pt[1] += 6;
-    else
-        pt[1] += 6;
+//    datum.innerRadius = pieRad/1.2;
+//    datum.outerRadius = pieRad;
+    //var pt = arcPath.centroid(datum);
+    var midAng = 1.57-(datum.startAngle + datum.endAngle)/2.0;  //goofy pie angle starts at 0 at 12-o'clock, so normal trig angle is like pi/2-pieAng
+    var pt = [0.75*pieRad*Math.cos(midAng), -0.75*pieRad*Math.sin(midAng)]; //y is inverted. y decrease = up screen
+    // if ( halfAng > 1.57 && halfAng < 4.71)
+    //     pt[1] += 6;
+    // else
+    //     pt[1] += 6;
+
+    
     return 'translate('+pt+')';
 }
 
 function pie_text_transform_lower(datum, index) {
-    datum.innerRadius = pieRad/1.5;
-    datum.outerRadius = pieRad;
-    var pt = arcPath.centroid(datum);
-    var halfAng = (datum.startAngle + datum.endAngle)/2.0
-    if ( halfAng > 1.57 && halfAng < 4.71)
-        pt[1] -= 6;
-    else
-        pt[1] -= 6;
+    var midAng = 1.57-(datum.startAngle + datum.endAngle)/2.0;  //goofy pie angle starts at 0 at 12-o'clock, so normal trig angle is like pi/2-pieAng
+    var pt = [0.75*pieRad*Math.cos(midAng), -0.75*pieRad*Math.sin(midAng)]; //y is inverted. y decrease = up screen
+    pt[1] += 12;
     return 'translate('+pt+')';
 }
 
-controlInfo.clear_info = function(mouseEvent) {
-    if (controlInfo.isVisible) {
-        controlInfo.remove(LMap);
-        controlInfo.isVisible = false;
-    }
-}
+
 
 
 //create the legend
@@ -582,6 +586,7 @@ LMap.locate({setView: true});
 var locMarker, locCircle;
 function on_location_found(e) {
     var uncertaintyRadius = e.accuracy / 2;
+    e.latlng = [38,-114];
     locMarker = L.marker(e.latlng, {opacity:.75, title: e.latlng});
     locMarker.addTo(LMap);
     var locPopup = L.popup({opacity:.5});

@@ -1,18 +1,33 @@
+//used from map_income_overlay:
+//zipIncomeVals
+//
+
 //constants that affect look/feel of plot
 var barHeight = 12,
     spaceOnLeft = 38,       //space between left edge of bars and edge of parent element (for label text + y-axis)
     spaceOnRight = 4,       //space between right edge of max length bar and edge of parent element
+    spaceOnTop = 2;
     labelEndToRectStart = 4,//space between left edge of bar and right edge of label text
-    gapBetweenGroups = .5,  //vertical space between each bar
+    gapBetweenBars = .5,  //vertical space between each bar
     scrollStep = 24,
     arrowWidth = 16, arrowHeight = 12, arrowPad = 4, arrowEdgePad = 2; //
 
 //some globals we'll keep track of and update
 var zipCount, maxPlotVal, //cache some descriptors of the data
     x_scale, y_scale,     //d3 scaling functions mapping data val to pixel sizes
-    scrollRow = 0,        //keep track of row position when scrolling
+    scrollRow = 0, maxScrollRow,       //keep track of row position when scrolling
     svgHeight, svgWidth;  //dimensions of the <td> tag that contains the bar plot (30% width, 100% height)
 
+// function on_mousewheel_plotchart(event) {
+//     on_click_scroll_down();
+// }
+// function on_scroll_plotchart(event) {
+//     alert('scrolled!');
+//}
+function on_wheel_plotchart(event) {
+    console.log(event.wheelDelta, event.wheelDeltaY, event.deltaY);
+    scroll_plot(Math.floor(-event.wheelDeltaY/100.0)*scrollStep);
+}
 
 function add_d3_plot() {
     //assuming zipIncomeVals is already loaded...
@@ -22,44 +37,54 @@ function add_d3_plot() {
 	    if (isNaN(intVal))
 	        intVal = 0;
         plotObjs.push([zipId, intVal]);
-        if (plotObjs.length >= 250)
-            break;
     }
     zipCount = plotObjs.length;
     maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
     plotObjs.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotObjs by second col (income, desc)
 
-    var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
+    //var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
+    var divRect = document.getElementById('d3-plot').getBoundingClientRect();
     svgWidth = divRect.width;
     svgHeight = divRect.height;
     var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
-    var plotHeight = zipCount*(barHeight + gapBetweenGroups) - gapBetweenGroups;  //probably runs way below page
+    var plotHeight = zipCount*(barHeight + gapBetweenBars) - gapBetweenBars;  //probably runs way below page
 
     //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
-    x_scale = d3.scale.linear()
+    x_scale = d3.scaleLinear()
         .domain([0, maxPlotVal])
         .range([0, plotWidth]);
 
-    y_scale = d3.scale.linear()
-        .range([svgHeight, 0]);
-
+    //contains the whole right side/bar chart. fills right half of screen
     var plotChart = d3.select("#d3-plot")
         .attr("width", plotWidth)
         .attr("height", plotHeight);
+        // .on("mousewheel", on_mousewheel_plotchart)
+        // .on("scoll", on_scroll_plotchart)
+        // .on("wheel", on_wheel_plotchart);
 
-    //defines the transform?
+    //selection.on("wheel", func) doesn't have access to wheel direction?
+    //$('#d3-plot')[0]
+    document.getElementById('d3-plot')
+        .addEventListener("wheel", on_wheel_plotchart, {passive:true});
+        // .on("scoll", on_scroll_plotchart)
+        // .on("wheel", on_wheel_plotchart);
+
+    //a group to contain all movable elements in the bar plot for resizing and scrolling
     var plotBars = plotChart.selectAll("g")
         .data(plotObjs)   //data here
         .enter().append("g")
             .attr("class", 'plot-elems')
-            .attr("transform", plot_elem_transform);
+            //.attr("transform", plot_elem_transform);
 
+    //the colorful data bars
     plotBars.append("rect")
         .attr("class", 'plot-bar')
         .attr("fill", function(d,i) { return map_color(d[1]); })
         .attr("width", function(d) { return x_scale(d[1]); })
         .attr("height", barHeight)
-        .on({"mouseover": on_mouseover_plotbar, "mouseout": on_mouseout_plotbar, "click": on_click_plotbar});
+        .on("mouseover", on_mouseover_plotbar)
+        .on("mouseout", on_mouseout_plotbar)
+        .on("click", on_click_plotbar);
 
     //the text inside the bar that shows the value
     plotBars.append("text")
@@ -77,31 +102,31 @@ function add_d3_plot() {
         .attr("dy", ".35em")
         .text(function(d,i) { return d[0]; });
 
-    //define a line for the y-axis, maybe with some tick marks
-    var y_axis = d3.svg.axis()  //TODO fix axis scrolling with everything else
-        .scale(y_scale)
-        .tickFormat('')
-        .tickSize(0)
-        .orient("left");  //put tick left of axis
-
-    //draw/update the y-axis?
+    //y-axis line and ticks. this is the d3-v4 version: scale.linear -> scaleLinear, svg.axis->axisLeft
+    y_scale = d3.scaleLinear().range([0, svgHeight]);
     plotChart.append("g")
-      .attr("class", 'y-axis')
-      .attr("transform", 'translate('+spaceOnLeft+','+gapBetweenGroups+')')
-      .call(y_axis);
+        .attr("class", "y-axis")
+        //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
+        .call(d3.axisLeft(y_scale)
+            .ticks(plotWidth/(barHeight+gapBetweenBars))
+            .tickSizeInner(1)
+            .tickSizeOuter(0)
+            .tickFormat("")
+        );
+
 
     //var arrowDataBot = [[0,0],[arrowWidth,arrowHeight],[2*arrowWidth,0]];
     var arrowDataBot = [[0,0],[arrowWidth-1,arrowHeight],[arrowWidth+1,arrowHeight],[2*arrowWidth,0]];
     var arrowDataTop = [[0,arrowHeight],[arrowWidth-1,0],[arrowWidth+1,0],[2*arrowWidth,arrowHeight]];  //can programmatically invert? having this duplicate irks me
-    var lineFunction = d3.svg.line()
+    var lineFunction = d3.line()  //in v4, d3.svg.line -> d3.line and 'linear' -> d3.curveLinear
         .x(function(d) { return d[0];})
         .y(function(d) { return d[1];})
-        .interpolate("linear");
+        .curve(d3.curveLinear);
 
     //bottom scroll arrow
     var scrollOverlayBot = plotChart.append("g")
         .attr("class", "scroll-area-bot")
-        .attr("transform", translate_scroll_area_bot);
+        //.attr("transform", translate_scroll_area_bot);
     // the scroll arrow
     scrollOverlayBot.append("path")
         .attr("d", lineFunction(arrowDataBot))
@@ -114,12 +139,15 @@ function add_d3_plot() {
         .attr("width", 2*arrowWidth+2*arrowPad)
         .attr("height", arrowHeight+2*arrowPad+arrowEdgePad)
         .attr("fill", 'rgba(255,255,255,0.0)')  // == 'transparent'
-        .attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad)+')')
-        .on({"click": on_click_scroll_down, "mouseover": on_mouseover_scroll_down, "mouseout": on_mouseout_scroll_down});
+        //.attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad)+')')
+        .on("click", function () { scroll_plot(scrollStep); } )
+        .on("mouseover", on_mouseover_scroll_down)
+        .on("mouseout", on_mouseout_scroll_down)
+//        .on({"click": on_click_scroll_down, "mouseover": on_mouseover_scroll_down, "mouseout": on_mouseout_scroll_down}); //okay this syntax doesn't work with d3v4?
 
     var scrollOverlayTop = plotChart.append("g")
         .attr("class", "scroll-area-top")
-        .attr("transform", translate_scroll_area_top);
+        //.attr("transform", translate_scroll_area_top);
     // the scroll arrow
     scrollOverlayTop.append("path")
         .attr("d", lineFunction(arrowDataTop))
@@ -132,9 +160,45 @@ function add_d3_plot() {
         .attr("width", 2*arrowWidth+2*arrowPad)
         .attr("height", arrowHeight+2*arrowPad+arrowEdgePad)
         .attr("fill", 'rgba(255,255,255,0.0)')  // == 'transparent'
-        .attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad-arrowEdgePad)+')')
-        .on({"click": on_click_scroll_up, "mouseover": on_mouseover_scroll_up, "mouseout": on_mouseout_scroll_up});
+        //.attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad-arrowEdgePad)+')')
+        .on("click", function () { scroll_plot(scrollStep); } )
+        .on("mouseover", on_mouseover_scroll_up)
+        .on("mouseout", on_mouseout_scroll_up);
+
+    update_window_resize();
 }
+
+function update_window_resize() {
+    //don't do anything if plot not added yet
+    if (!x_scale)
+        return;
+
+    var plotRef = d3.select("#d3-plot");
+    var svgRect = plotRef.node().getBoundingClientRect();
+    svgHeight = svgRect.height;
+    svgWidth = svgRect.width;
+    var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
+    x_scale.range([0, plotWidth]);
+    plotRef.selectAll(".plot-bar")
+        .attr("width", function(d) { return x_scale(d[1]); });
+    plotRef.selectAll(".text-value")
+        .attr("x", text_values_attr_x);
+
+    plotRef.selectAll(".plot-elems")
+        .attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
+
+    plotRef.select(".scroll-area-bot")
+        .attr("transform", translate_scroll_area_bot);
+    plotRef.select(".scroll-area-top")
+        .attr("transform", translate_scroll_area_top);
+    
+    plotRef.select(".y-axis")
+        .attr("transform", 'translate('+spaceOnLeft+','+spaceOnTop+')');
+    
+
+    maxScrollRow = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenBars));
+}
+d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
 
 function text_values_attr_x(d) {
     return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
@@ -185,30 +249,31 @@ function on_mouseout_scroll_up() {
         .attr("stroke", 'rgba(0,0,0,.2)');
 }
 
-function on_click_scroll_down() {
-    var maxScroll = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenGroups));
-    if (scrollRow == maxScroll)
+
+function scroll_plot(scrollDist) {
+    if (scrollDist==0)
         return;
-    scrollRow = Math.min(scrollRow+scrollStep, maxScroll);
-    draw_animate_scroll();
-}
+    //scroll down == +scrollStep
+    if (scrollDist>0) {
+        if (scrollRow == maxScrollRow)
+            return;
+        scrollRow = Math.min(scrollRow+scrollDist, maxScrollRow);
+    }
+    //scroll up == -scrollStep
+    else {
+        if (scrollRow == 0)
+            return;
+        scrollRow = Math.max(scrollRow+scrollDist, 0);
+    }
 
-function on_click_scroll_up() {
-    if (scrollRow == 0)
-        return;
-
-    scrollRow = Math.max(scrollRow-scrollStep, 0);
-    draw_animate_scroll();
-}
-
-function plot_elem_transform(datum, index) {
-    var yPos = (index-scrollRow)*(barHeight+gapBetweenGroups) + 0.25*barHeight;
-    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
-}
-function draw_animate_scroll() {
     d3.selectAll('.plot-elems')
         .transition().duration(200)
             .attr("transform", plot_elem_transform);
+}
+
+function plot_elem_transform(datum, index) {
+    var yPos = (index-scrollRow)*(barHeight+gapBetweenBars) + spaceOnTop;// + 0.25*barHeight;
+    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
 }
 
 function on_mouseover_plotbar() {
@@ -237,29 +302,9 @@ function on_click_plotbar() {
     zoom_to_feature(topLayer);
 }
 
-function update_window_resize() {
-    if (!x_scale)
-        return;
 
-    var plotRef = d3.select("#d3-plot");
-    var svgRect = plotRef.node().getBoundingClientRect();
-    svgHeight = svgRect.height;
-    svgWidth = svgRect.width;
-    var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
-    x_scale.range([0, plotWidth]);
-    plotRef.selectAll(".plot-bar")
-        .attr("width", function(d) { return x_scale(d[1]); });
-    plotRef.selectAll(".text-value")
-        .attr("x", text_values_attr_x);
-    plotRef.select(".scroll-area-bot")
-        .attr("transform", translate_scroll_area_bot);
-    plotRef.select(".scroll-area-top")
-        .attr("transform", translate_scroll_area_top);
-}
-d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
-
-
-
+//kinda moves an element to back, behind other elements at same level.
+//Just pushes the element to the top of the list of stuff in its parent element (they get drawn in order, later stuff covers earlier stuff)
 d3.selection.prototype.moveToBack = function() {
     return this.each(function() {
         this.parentNode.insertBefore(this, this.parentNode.firstChild);
