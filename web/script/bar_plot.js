@@ -161,17 +161,18 @@ function add_d3_plot() {
         .attr("height", arrowHeight+2*arrowPad+arrowEdgePad)
         .attr("fill", 'rgba(255,255,255,0.0)')  // == 'transparent'
         //.attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad-arrowEdgePad)+')')
-        .on("click", function () { scroll_plot(scrollStep); } )
+        .on("click", function () { scroll_plot(-scrollStep); } )
         .on("mouseover", on_mouseover_scroll_up)
         .on("mouseout", on_mouseout_scroll_up);
 
+    d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
     update_window_resize();
 }
 
 function update_window_resize() {
     //don't do anything if plot not added yet
-    if (!x_scale)
-        return;
+    // if (!x_scale)
+    //     return;
 
     var plotRef = d3.select("#d3-plot");
     var svgRect = plotRef.node().getBoundingClientRect();
@@ -181,11 +182,14 @@ function update_window_resize() {
     x_scale.range([0, plotWidth]);
     plotRef.selectAll(".plot-bar")
         .attr("width", function(d) { return x_scale(d[1]); });
+        
     plotRef.selectAll(".text-value")
         .attr("x", text_values_attr_x);
 
-    plotRef.selectAll(".plot-elems")
-        .attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
+    //plotRef.selectAll(".plot-elems")
+    plotRef.selectAll("g")
+        .attr("transform", plot_elem_transform);
+    //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
 
     plotRef.select(".scroll-area-bot")
         .attr("transform", translate_scroll_area_bot);
@@ -198,7 +202,13 @@ function update_window_resize() {
 
     maxScrollRow = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenBars));
 }
-d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
+
+
+function plot_elem_transform(datum, index) {
+    var yPos = (index-scrollRow)*(barHeight+gapBetweenBars) + spaceOnTop;// + 0.25*barHeight;
+    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
+}
+
 
 function text_values_attr_x(d) {
     return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
@@ -209,6 +219,27 @@ function translate_scroll_area_bot() {
 }
 function translate_scroll_area_top() {
     return 'translate('+(0.5*svgWidth-arrowWidth-arrowPad)+','+(arrowPad+arrowEdgePad)+')';
+}
+
+function scroll_plot(scrollDist) {
+    if (scrollDist==0)
+        return;
+    //scroll down == +scrollStep
+    if (scrollDist>0) {
+        if (scrollRow == maxScrollRow)
+            return;
+        scrollRow = Math.min(scrollRow+scrollDist, maxScrollRow);
+    }
+    //scroll up == -scrollStep
+    else {
+        if (scrollRow == 0)
+            return;
+        scrollRow = Math.max(scrollRow+scrollDist, 0);
+    }
+
+    d3.selectAll('.plot-elems')
+        .transition().duration(200)
+            .attr("transform", plot_elem_transform);
 }
 
 // all these next mouse* functions are just to make the neat little highlight effect before scrolling
@@ -247,33 +278,6 @@ function on_mouseout_scroll_up() {
         .attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad-arrowEdgePad)+')')
     d3.select(".scroll-area-top").select('path')
         .attr("stroke", 'rgba(0,0,0,.2)');
-}
-
-
-function scroll_plot(scrollDist) {
-    if (scrollDist==0)
-        return;
-    //scroll down == +scrollStep
-    if (scrollDist>0) {
-        if (scrollRow == maxScrollRow)
-            return;
-        scrollRow = Math.min(scrollRow+scrollDist, maxScrollRow);
-    }
-    //scroll up == -scrollStep
-    else {
-        if (scrollRow == 0)
-            return;
-        scrollRow = Math.max(scrollRow+scrollDist, 0);
-    }
-
-    d3.selectAll('.plot-elems')
-        .transition().duration(200)
-            .attr("transform", plot_elem_transform);
-}
-
-function plot_elem_transform(datum, index) {
-    var yPos = (index-scrollRow)*(barHeight+gapBetweenBars) + spaceOnTop;// + 0.25*barHeight;
-    return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
 }
 
 function on_mouseover_plotbar() {
