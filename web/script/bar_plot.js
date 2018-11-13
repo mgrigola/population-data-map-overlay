@@ -89,10 +89,10 @@ function add_d3_plot() {
     //the text inside the bar that shows the value
     plotBars.append("text")
         .attr("class", 'text-value')
+        .text(function(d) { return '$'+d[1].toLocaleString(); })
         .attr("x", text_values_attr_x)
         .attr("y", barHeight/2)
-        .attr("dy", ".4em")
-        .text(function(d) { return '$'+d[1].toLocaleString(); });
+        .attr("dy", ".4em");
 
     //the y-axis label showing the zip code
     plotBars.append("text")
@@ -209,9 +209,13 @@ function plot_elem_transform(datum, index) {
     return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
 }
 
-
 function text_values_attr_x(d) {
-    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
+    var v = this.textLength.baseVal.value;
+    var textLengthPx = v>0 ? Math.ceil(v) : (this.textContent.length>0 ? this.textContent.length*6.0 : 40);
+    var barLengthPx = x_scale(d[1]);
+
+    return (textLengthPx+2 < barLengthPx) ? barLengthPx-2 : barLengthPx+textLengthPx+2; 
+//    return Math.max(x_scale(d[1])-3, 12);  //min cap at 9 so values are always right of axis TODO use text width not 9
 }
 
 function translate_scroll_area_bot() {

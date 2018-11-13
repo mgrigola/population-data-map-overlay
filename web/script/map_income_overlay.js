@@ -61,132 +61,7 @@ LMap.on('overlayremove', function(layersControlEvent) {
     }
 });
 
-var distTooltip, distMarkerA, distMarkerB, distPolyline, drawingLine=false, clearTimer;
-LMap.on('click', function(mouseEvent) {
-    if (!drawingLine && mouseEvent.originalEvent.ctrlKey) {
-        if (distPolyline) {
-            clear_distance_markers();
-        }
-        else {
-            distPolyline = L.polyline([], {color: 'red', opacity: 0.25, dashArray: '4', interactive: false});
-        }
-        distPolyline.setStyle({opacity: 0.2});
-        distPolyline.addTo(LMap);
-        drawingLine = true;
-        distMarkerA = L.marker(mouseEvent.latlng, {
-            //icon: L.divIcon({className: 'my-div-icon'}),
-            title: 'A',
-            opacity: 0.75,
-            keyboard: false
-        });
-        distMarkerA.addTo(LMap); //.bindPopup('<h4>A</h4><div>distP1</div>').openPopup();
-        distTooltip = L.tooltip({direction:'right', offset: [0,-10]});
-        LMap.addEventListener('mousemove', update_distance_line);
-    }
-    else if (drawingLine) {
-        drawingLine = false;
-        LMap.removeEventListener('mousemove', update_distance_line);
-        distMarkerB = L.marker(mouseEvent.latlng, {
-            //icon: L.divIcon({className: 'my-div-icon'}),  //don't use the marker, build our own marker
-            title: 'B',
-            opacity: 0.75,
-            keyboard: false
-        });
-        distMarkerB.addTo(LMap); //.bindPopup('<h4>B</h4><div>distP1</div>').openPopup();
-        distPolyline.setLatLngs([distMarkerA.getLatLng(), distMarkerB.getLatLng()]);
-        distPolyline.setStyle({opacity: 0.8});
-        distMarkerA.options.opacity = 0.75;
-        distMarkerB.options.opacity = 0.75;
-        var dist = calc_distance(distMarkerA.getLatLng(), distMarkerB.getLatLng());
 
-        distPolyline.bindTooltip(distTooltip).openTooltip();
-        distTooltip.setContent(dist+' mi');
-        clearTimer = window.setTimeout(clear_distance_markers, 3000);
-    }
-});
-
-function update_distance_line(mouseEvent) {
-    var dist = calc_distance(distMarkerA.getLatLng(), mouseEvent.latlng);
-    distPolyline.setLatLngs([distMarkerA.getLatLng(), mouseEvent.latlng])
-
-    distPolyline.bindTooltip(distTooltip).openTooltip();
-    distTooltip.setContent(dist+' mi');
-};
-
-function clear_distance_markers() {
-    window.clearTimeout(clearTimer);
-    if (drawingLine)
-        return;
-
-    if(distMarkerA) distMarkerA.remove();
-    if(distMarkerB) distMarkerB.remove();
-    if(distPolyline) {
-        distPolyline.setLatLngs([]);
-        distPolyline.remove();
-    }
-}
-
-//haversine formula to calculate great circle distance between 2 latlng coords
-function calc_distance(ptA, ptB) {
-    var rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137
-        deg2rad = Math.PI/180,
-        dLng = deg2rad*(ptB.lng-ptA.lng)/2.0,
-        dLat = deg2rad*(ptB.lat-ptA.lat)/2.0;
-
-    var h = Math.pow(Math.sin(dLat), 2) + Math.pow(Math.sin(dLng), 2)*Math.cos(deg2rad*ptA.lat)*Math.cos(deg2rad*ptB.lat);
-    return round_sig_figs(2*rEarth*Math.asin(Math.sqrt(h)), 3, false);
-}
-
-//calculate area from coordinates. math
-//coordinates for a geojson object are an array of polygons ('islands' are separate polygons)
-//I've removed negative spaces ('holes') in pre-processing, so don't need to worry about that
-// ignoring negative holes will make some areas wrong, but it makes this calculation simpler
-function calc_geodesic_area(coords) {
-    var area = 0.0,
-        deg2rad = Math.PI/180,
-        rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137  //it varies, so more than like 2/3 sigfigs is not justifiable
-        polygon, ptCnt, p1, p2;
-
-    for (var polyNo=0; polyNo<coords.length; polyNo++) {
-        polygon = coords[polyNo]
-        ptCnt = polygon.length;
-        if (ptCnt > 2) {
-            for (var ptNo=0; ptNo<ptCnt; ptNo++) {
-                p1 = polygon[ptNo];
-                p2 = polygon[ (ptNo+1) % ptCnt ];
-                area += ((p2[0] - p1[0]) * deg2rad) * (2 + Math.sin(p1[1] * deg2rad) + Math.sin(p2[1] * deg2rad));
-            }
-        }
-    }
-
-    return Math.abs(area*rEarth*rEarth / 2.0);
-}
-
-//There's a toFixed(decimals) and toPrecision(sigFigs), but I don't like them.
-//  This is like toPrecision, but doesn't do scientific notation
-//given value and number of significant figures, returns the value rounded appropriately (as float)
-//something like 1.00 will present as 1. rounds -1.5 to -2 (away from 0)
-function round_sig_figs(val, sigFigs=3, trailZeros=false, round_func=Math.round) {
-    var sign = Math.sign(val);
-    var logTen = Math.floor(Math.log10(sign*val));
-    var scale = Math.pow(10.0, sigFigs - logTen - 1);
-    var noDecVal = sign*round_func(sign*val*scale);
-    var roundedVal = noDecVal / scale;
-    if (!trailZeros) return roundedVal
-
-    //TODO
-    //this doesn't work atm. consider 600: 600+"00" = "60000",  60.0: 60+"00" = "6000". Gotta consider the decimal place
-    //for something like 3 sigfigs for 0.02, we want to return '0.0200'
-    //if the tens, hundreds, etc -place digit is 0, we record '0' and move to next place
-    //the noDecVal will be like 200 for 0.02 -> sigfigs end at the decimal and we divide at end
-    var trailingZeroStr = '';
-    var digitMultiplier = 10;
-    while (noDecVal%digitMultiplier==0) {
-        trailingZeroStr += '0';
-        digitMultiplier *= 10;
-    }
-    return roundedVal+trailingZeroStr;  //0.02+'00' = '0.0200'
-}
 
 //these are standard labels defined by census bureau
 //the income dataset is from ACS (American Community Survey) ref#: S1901 (from 2016, 5year average ['12-'16] estimates)
@@ -401,7 +276,7 @@ function zoom_to_feature(leafletLayer) {
 
 //adds this little info popup box overlaid on the right of the map with some contextual detail
 var controlInfo = L.control();
-controlInfo.isVisible = false;  //can i do this?
+controlInfo.isVisible = false;
 controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'pie-box'); //'my-mini-plot');
     this._div.innerHTML = '<h4>Income Distribution in '+regionId+'</h4>';
@@ -526,7 +401,7 @@ mapLegend.onAdd = function (_) {
     //generate color gradations for the legend here
     legendText.push('<legli style="background:' + map_color(colormapMinVal) + '"></legli> ' + '<' + colormapMinVal.toLocaleString());
     for (var gradeNo = 1; gradeNo < gradeCount-1; gradeNo++) {
-        gradeVal = Math.floor( gradeNo*(colormapMaxVal - colormapMinVal)/gradeCount + colormapMinVal );
+        gradeVal = round_sig_figs( gradeNo*(colormapMaxVal - colormapMinVal)/gradeCount + colormapMinVal, 2 );
         legendText.push('<legli style="background:' + map_color(gradeVal) + '"></legli> &nbsp;&nbsp;' + gradeVal.toLocaleString());
     }
     legendText.push('<legli style="background:' + map_color(colormapMaxVal) + '"></legli> ' + '>' + colormapMaxVal.toLocaleString());
@@ -604,4 +479,139 @@ function on_location_found(e) {
 // can't or refused to get location -> go to madison
 function on_location_error(e) {
     LMap.setView([41.7, -87.9], 9);
+}
+
+
+
+
+
+
+
+//some unnecessary stuff to measure distance on the map because we can. (press ctrl and click, pretty clunky)
+//also I always want to measure distances on maps and can't
+var distTooltip, distMarkerA, distMarkerB, distPolyline, drawingLine=false, clearTimer;
+LMap.on('click', function(mouseEvent) {
+    if (!drawingLine && mouseEvent.originalEvent.ctrlKey) {
+        if (distPolyline) {
+            clear_distance_markers();
+        }
+        else {
+            distPolyline = L.polyline([], {color: 'red', opacity: 0.25, dashArray: '4', interactive: false});
+        }
+        distPolyline.setStyle({opacity: 0.2});
+        distPolyline.addTo(LMap);
+        drawingLine = true;
+        distMarkerA = L.marker(mouseEvent.latlng, {
+            //icon: L.divIcon({className: 'my-div-icon'}),
+            title: 'A',
+            opacity: 0.75,
+            keyboard: false
+        });
+        distMarkerA.addTo(LMap); //.bindPopup('<h4>A</h4><div>distP1</div>').openPopup();
+        distTooltip = L.tooltip({direction:'right', offset: [0,-10]});
+        LMap.addEventListener('mousemove', update_distance_line);
+    }
+    else if (drawingLine) {
+        drawingLine = false;
+        LMap.removeEventListener('mousemove', update_distance_line);
+        distMarkerB = L.marker(mouseEvent.latlng, {
+            //icon: L.divIcon({className: 'my-div-icon'}),  //don't use the marker, build our own marker
+            title: 'B',
+            opacity: 0.75,
+            keyboard: false
+        });
+        distMarkerB.addTo(LMap); //.bindPopup('<h4>B</h4><div>distP1</div>').openPopup();
+        distPolyline.setLatLngs([distMarkerA.getLatLng(), distMarkerB.getLatLng()]);
+        distPolyline.setStyle({opacity: 0.8});
+        distMarkerA.options.opacity = 0.75;
+        distMarkerB.options.opacity = 0.75;
+        var dist = calc_distance(distMarkerA.getLatLng(), distMarkerB.getLatLng());
+
+        distPolyline.bindTooltip(distTooltip).openTooltip();
+        distTooltip.setContent(dist+' mi');
+        clearTimer = window.setTimeout(clear_distance_markers, 3000);
+    }
+});
+
+function update_distance_line(mouseEvent) {
+    var dist = calc_distance(distMarkerA.getLatLng(), mouseEvent.latlng);
+    distPolyline.setLatLngs([distMarkerA.getLatLng(), mouseEvent.latlng])
+
+    distPolyline.bindTooltip(distTooltip).openTooltip();
+    distTooltip.setContent(dist+' mi');
+};
+
+function clear_distance_markers() {
+    window.clearTimeout(clearTimer);
+    if (drawingLine)
+        return;
+
+    if(distMarkerA) distMarkerA.remove();
+    if(distMarkerB) distMarkerB.remove();
+    if(distPolyline) {
+        distPolyline.setLatLngs([]);
+        distPolyline.remove();
+    }
+}
+
+//haversine formula to calculate great circle distance between 2 latlng coords
+function calc_distance(ptA, ptB) {
+    var rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137
+        deg2rad = Math.PI/180,
+        dLng = deg2rad*(ptB.lng-ptA.lng)/2.0,
+        dLat = deg2rad*(ptB.lat-ptA.lat)/2.0;
+
+    var h = Math.pow(Math.sin(dLat), 2) + Math.pow(Math.sin(dLng), 2)*Math.cos(deg2rad*ptA.lat)*Math.cos(deg2rad*ptB.lat);
+    return round_sig_figs(2*rEarth*Math.asin(Math.sqrt(h)), 3, false);
+}
+
+//calculate area from coordinates. math
+//coordinates for a geojson object are an array of polygons ('islands' are separate polygons)
+//I've removed negative spaces ('holes') in pre-processing, so don't need to worry about that
+// ignoring negative holes will make some areas wrong, but it makes this calculation simpler
+function calc_geodesic_area(coords) {
+    var area = 0.0,
+        deg2rad = Math.PI/180,
+        rEarth = 3960.0,   //earth_rad in meters: 6378137.0 | miles: 3963.19 | km: 6378.137  //it varies, so more than like 2/3 sigfigs is not justifiable
+        polygon, ptCnt, p1, p2;
+
+    for (var polyNo=0; polyNo<coords.length; polyNo++) {
+        polygon = coords[polyNo]
+        ptCnt = polygon.length;
+        if (ptCnt > 2) {
+            for (var ptNo=0; ptNo<ptCnt; ptNo++) {
+                p1 = polygon[ptNo];
+                p2 = polygon[ (ptNo+1) % ptCnt ];
+                area += ((p2[0] - p1[0]) * deg2rad) * (2 + Math.sin(p1[1] * deg2rad) + Math.sin(p2[1] * deg2rad));
+            }
+        }
+    }
+
+    return Math.abs(area*rEarth*rEarth / 2.0);
+}
+
+//There's a toFixed(decimals) and toPrecision(sigFigs), but I don't like them.
+//  This is like toPrecision, but doesn't do scientific notation
+//given value and number of significant figures, returns the value rounded appropriately (as float)
+//something like 1.00 will present as 1. rounds -1.5 to -2 (away from 0)
+function round_sig_figs(val, sigFigs=3, trailZeros=false, round_func=Math.round) {
+    var sign = Math.sign(val);
+    var logTen = Math.floor(Math.log10(sign*val));
+    var scale = Math.pow(10.0, sigFigs - logTen - 1);
+    var noDecVal = sign*round_func(sign*val*scale);
+    var roundedVal = noDecVal / scale;
+    if (!trailZeros) return roundedVal
+
+    //TODO
+    //this doesn't work atm. consider 600: 600+"00" = "60000",  60.0: 60+"00" = "6000". Gotta consider the decimal place
+    //for something like 3 sigfigs for 0.02, we want to return '0.0200'
+    //if the tens, hundreds, etc -place digit is 0, we record '0' and move to next place
+    //the noDecVal will be like 200 for 0.02 -> sigfigs end at the decimal and we divide at end
+    var trailingZeroStr = '';
+    var digitMultiplier = 10;
+    while (noDecVal%digitMultiplier==0) {
+        trailingZeroStr += '0';
+        digitMultiplier *= 10;
+    }
+    return roundedVal+trailingZeroStr;  //0.02+'00' = '0.0200'
 }
