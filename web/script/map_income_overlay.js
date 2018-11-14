@@ -275,11 +275,12 @@ function zoom_to_feature(leafletLayer) {
 }
 
 //adds this little info popup box overlaid on the right of the map with some contextual detail
-var controlInfo = L.control();
+var controlInfo = L.control({position:'topleft'});
 controlInfo.isVisible = false;
 controlInfo.onAdd = function (e) {
     this._div = L.DomUtil.create('div', 'pie-box'); //'my-mini-plot');
-    this._div.innerHTML = '<h4>Income Distribution in '+regionId+'</h4>';
+    this._div.innerHTML = '<div align="center"><span width="200">Household Income Distribution in '+regionId+'</span></div>';
+
 
     controlInfo.isVisible = true;
     return this._div;
@@ -306,7 +307,8 @@ controlInfo.update_info = function(leafletLayer) {
         return;
     
     //controlInfo.clear_info();
-    d3.select('.pie-box.svg').remove();
+    d3.select('.pie-box.div').remove();  //remove existing plot and recreate a new one each time clicked
+
 
     var props = leafletLayer.feature.properties;
     var regionIncome = zipIncomeVals[props.zip];
@@ -319,13 +321,13 @@ controlInfo.update_info = function(leafletLayer) {
     //     incomeData.push({'label':keyList[idx][0], 'value':zipIncomeVals[props.zip][keyList[idx][0]]});
     // }
 
-    var pieThing = d3.select('.pie-box');
+    var pieThing = d3.select('.pie-box').append('div');
     var pieThing2 = pieThing.append('svg')
         .data([incomeData])
-        .attr("width", pieWidth)
-        .attr("height", pieHeight)
+        .attr("width", pieWidth+4)
+        .attr("height", pieHeight+4)
         .append("g")
-            .attr("transform", 'translate('+(pieWidth/2)+','+(pieHeight/2)+')');
+            .attr("transform", 'translate('+(pieWidth/2+2)+','+(pieHeight/2+2)+')');
 
     var pieLayout = d3.pie()
         .value(pie_layout_func)
@@ -338,7 +340,8 @@ controlInfo.update_info = function(leafletLayer) {
             .attr("class", 'pie-slice');
     
     pieSlices.append('path')
-        .attr("fill", pie_color_func)
+        .style("fill", pie_color_func)
+        //.attr("fill", pie_color_func)
         .attr("d", debug_arc_path);
 
     var slicesThatFitText = pieSlices.filter(d => (d.endAngle-d.startAngle)*pieRad/2>30)

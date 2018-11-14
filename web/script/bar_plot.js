@@ -37,6 +37,8 @@ function add_d3_plot() {
 	    if (isNaN(intVal))
 	        intVal = 0;
         plotObjs.push([zipId, intVal]);
+        if (plotObjs.length > 200)
+            break;
     }
     zipCount = plotObjs.length;
     maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
@@ -103,13 +105,15 @@ function add_d3_plot() {
         .text(function(d,i) { return d[0]; });
 
     //y-axis line and ticks. this is the d3-v4 version: scale.linear -> scaleLinear, svg.axis->axisLeft
-    y_scale = d3.scaleLinear().range([0, svgHeight]);
+    //god damn this axis never behaves how I want it to!!!ntliuh89pfu5
+    y_scale = d3.scaleLinear().range([0, plotHeight]);  //.domain([plotHeight, 0])
     plotChart.append("g")
         .attr("class", "y-axis")
         //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
-        .call(d3.axisLeft(y_scale)
-            .ticks(plotWidth/(barHeight+gapBetweenBars))
-            .tickSizeInner(1)
+        .call(
+            d3.axisLeft(y_scale)
+            .ticks(0) //zipCount-1 fuck these ticks //svgHeight/(barHeight+gapBetweenBars)
+            .tickSizeInner(6)
             .tickSizeOuter(0)
             .tickFormat("")
         );
@@ -186,8 +190,8 @@ function update_window_resize() {
     plotRef.selectAll(".text-value")
         .attr("x", text_values_attr_x);
 
-    //plotRef.selectAll(".plot-elems")
-    plotRef.selectAll("g")
+    plotRef.selectAll(".plot-elems")
+    //plotRef.selectAll("g")
         .attr("transform", plot_elem_transform);
     //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
 
@@ -195,11 +199,11 @@ function update_window_resize() {
         .attr("transform", translate_scroll_area_bot);
     plotRef.select(".scroll-area-top")
         .attr("transform", translate_scroll_area_top);
-    
-    plotRef.select(".y-axis")
+
+    //y_scale = d3.scaleLinear().range([0, plotHeight]);
+    plotRef.selectAll(".y-axis")
         .attr("transform", 'translate('+spaceOnLeft+','+spaceOnTop+')');
     
-
     maxScrollRow = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenBars));
 }
 
