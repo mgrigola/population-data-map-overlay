@@ -18,31 +18,75 @@ var zipCount, maxPlotVal, //cache some descriptors of the data
     scrollRow = 0, maxScrollRow,       //keep track of row position when scrolling
     svgHeight, svgWidth;  //dimensions of the <td> tag that contains the bar plot (30% width, 100% height)
 
-// function on_mousewheel_plotchart(event) {
-//     on_click_scroll_down();
-// }
-// function on_scroll_plotchart(event) {
-//     alert('scrolled!');
-//}
-function on_wheel_plotchart(event) {
-    console.log(event.wheelDelta, event.wheelDeltaY, event.deltaY);
-    scroll_plot(Math.floor(-event.wheelDeltaY/100.0)*scrollStep);
+var plotData, sortOption = -2;
+
+
+//var headerHeight = 22;  //not actua used at the moment
+var headerPadPixels = 8;  // = 2*[outset border] plus 2*[padding] (for each side)
+
+
+function on_mousedown_header_income(e) {
+    d3.select(this).style('border-style', 'inset');
+}
+function on_mouseup_header_income(e) {
+    d3.select(this).style('border-style', 'outset');
+
+    if (Math.abs(sortOption) == 1)
+        sortOption = -2;
+    else
+        sortOption = -sortOption;
+    
+    prepare_data();
+    var plotElems = d3.selectAll('.plot-elems');
+    plotElems.data(plotData);
+    
+    plotElems.transition().duration(500)
+        .attr("fill", function(d,i) { return map_color(d[1]); })
+        .attr("width", function(d) { return x_scale(d[1]); });
+        //.attr('transform', plot_elem_transform);    
 }
 
+function prepare_data() {
+    if (sortOption == 2)
+        plotData.sort(function(a, b) { return a[1]>b[1] ? 1 : -1; });  //sorts plotData by second col (income, asc)
+    else if (sortOption == -2)
+        plotData.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotData by second col (income, desc)
+    else if (sortOption == 1)
+        plotData.sort(function(a, b) { return a[0]>b[0] ? 1 : -1; });  //sorts plotData by first col (zip, desc)
+    else if (sortOption == -1)
+        plotData.sort(function(a, b) { return a[0]<b[0] ? 1 : -1; });  //sorts plotData by first col (zip, asc)
+}
+
+
 function add_d3_plot() {
+
+    //div for the column headers, clickable for sorting and stuff
+    var headerDiv = d3.select('#d3-plot').append('div')
+        .attr('class', 'plot-header');
+        //.style('width', '100%');
+        //.style('height', headerHeight);
+
+    //div to contain the svg stuff that is the actual 'plot' (bars and numebrs and whatnot)
+    var plotDiv = d3.select('#d3-plot').append('div')
+        .attr('height', '100%')
+        .attr('width', '100%');
+    
+    var plotChart = plotDiv.append('svg');
+    //var plotChart = d3.select('#d3-plot').append('svg');
+
     //assuming zipIncomeVals is already loaded...
-    var plotObjs = [];
+    plotData = [];
     for (var zipId in zipIncomeVals) {
         var intVal = +zipIncomeVals[zipId][keyToDisplay];
 	    if (isNaN(intVal))
 	        intVal = 0;
-        plotObjs.push([zipId, intVal]);
-        if (plotObjs.length > 200)
+        plotData.push([zipId, intVal]);
+        if (plotData.length > 200)
             break;
     }
-    zipCount = plotObjs.length;
-    maxPlotVal = Math.max.apply(Math, plotObjs.map(function(obj) {return obj[1];}));  //finds max val in second col of plotObjs (max income)
-    plotObjs.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotObjs by second col (income, desc)
+    zipCount = plotData.length;
+    maxPlotVal = Math.max.apply(Math, plotData.map(function(obj) {return obj[1];}));  //finds max val in second col of plotData (max income)
+    prepare_data();
 
     //var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
     var divRect = document.getElementById('d3-plot').getBoundingClientRect();
@@ -50,33 +94,54 @@ function add_d3_plot() {
     svgHeight = divRect.height;
     var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
     var plotHeight = zipCount*(barHeight + gapBetweenBars) - gapBetweenBars;  //probably runs way below page
+    //var plotTotalHeight = zipCount*(barHeight + gapBetweenBars) - gapBetweenBars;  //probably runs way below page
+
+    var newPlotHeight = svgHeight- d3.select()
+
+    headerDiv.append('span')
+        //.style('border', '.5px solid #000')
+        .style('width', spaceOnLeft-headerPadPixels)  //headerPadPixels accounts for size distortion from styling
+        //.style('float', 'right')
+        // .style('padding', '2px')
+        // .style('vertical-align', 'center')
+        .html('Zip');
+    
+    headerDiv.append('span')
+        .attr('id', 'header-text-income')
+        //.style('border', '.5px solid #000')
+        //.style('width', '100%')
+        //.style('float', 'left')
+        // .style('padding', '2px')
+        // .style('vertical-align', 'center')
+        //.style('width', plotWidth+spaceOnRight-headerPadPixels) //headerPadPixels accounts for size distortion from styling
+        .on('mousedown', on_mousedown_header_income)
+        .on('mouseup', on_mouseup_header_income)
+        .html('Mean Household Income');
+
+    //the svg element that contains the whole right side/bar chart. fills right half of screen
+    //var plotChart = d3.select("#d3-plot")
+    plotChart
+        //.style('display', 'flex')
+        //.style("height", '100vh')
+        //.attr("width", plotWidth)
+        // .style('display', 'block')
+        // .style('overflow', 'auto')
+        // .style('position', 'relative')
+        .attr('width', '100%')
+        //.attr('height', '100%');
+        //.style("width", svgWidth)
+        //.style("height", '100%');
+
+    //a group to contain all movable elements in the bar plot for resizing and scrolling
+    var plotBars = plotChart.selectAll("g")
+        .data(plotData)   //data here
+        .enter().append("g")
+            .attr("class", 'plot-elems')
 
     //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
     x_scale = d3.scaleLinear()
         .domain([0, maxPlotVal])
         .range([0, plotWidth]);
-
-    //contains the whole right side/bar chart. fills right half of screen
-    var plotChart = d3.select("#d3-plot")
-        .attr("width", plotWidth)
-        .attr("height", plotHeight);
-        // .on("mousewheel", on_mousewheel_plotchart)
-        // .on("scoll", on_scroll_plotchart)
-        // .on("wheel", on_wheel_plotchart);
-
-    //selection.on("wheel", func) doesn't have access to wheel direction?
-    //$('#d3-plot')[0]
-    document.getElementById('d3-plot')
-        .addEventListener("wheel", on_wheel_plotchart, {passive:true});
-        // .on("scoll", on_scroll_plotchart)
-        // .on("wheel", on_wheel_plotchart);
-
-    //a group to contain all movable elements in the bar plot for resizing and scrolling
-    var plotBars = plotChart.selectAll("g")
-        .data(plotObjs)   //data here
-        .enter().append("g")
-            .attr("class", 'plot-elems')
-            //.attr("transform", plot_elem_transform);
 
     //the colorful data bars
     plotBars.append("rect")
@@ -87,6 +152,14 @@ function add_d3_plot() {
         .on("mouseover", on_mouseover_plotbar)
         .on("mouseout", on_mouseout_plotbar)
         .on("click", on_click_plotbar);
+
+    //background for text labels?
+    // plotBars.append("rect")
+    //     //.attr('class', 'new-class')
+    //     .attr('fill', '#d00')
+    //     .attr('width', spaceOnLeft)
+    //     .attr('height', barHeight)
+    //     .attr('dx', -spaceOnLeft);
 
     //the text inside the bar that shows the value
     plotBars.append("text")
@@ -99,13 +172,12 @@ function add_d3_plot() {
     //the y-axis label showing the zip code
     plotBars.append("text")
         .attr("class", 'text-label')
-        .attr("x", function(d) { return - labelEndToRectStart; })
+        .attr("x", function(d) { return -labelEndToRectStart; })
         .attr("y", barHeight / 2)
         .attr("dy", ".35em")
         .text(function(d,i) { return d[0]; });
 
     //y-axis line and ticks. this is the d3-v4 version: scale.linear -> scaleLinear, svg.axis->axisLeft
-    //god damn this axis never behaves how I want it to!!!ntliuh89pfu5
     y_scale = d3.scaleLinear().range([0, plotHeight]);  //.domain([plotHeight, 0])
     plotChart.append("g")
         .attr("class", "y-axis")
@@ -118,7 +190,7 @@ function add_d3_plot() {
             .tickFormat("")
         );
 
-
+    //the arrows that allow scrolling through the plot:
     //var arrowDataBot = [[0,0],[arrowWidth,arrowHeight],[2*arrowWidth,0]];
     var arrowDataBot = [[0,0],[arrowWidth-1,arrowHeight],[arrowWidth+1,arrowHeight],[2*arrowWidth,0]];
     var arrowDataTop = [[0,arrowHeight],[arrowWidth-1,0],[arrowWidth+1,0],[2*arrowWidth,arrowHeight]];  //can programmatically invert? having this duplicate irks me
@@ -169,20 +241,43 @@ function add_d3_plot() {
         .on("mouseover", on_mouseover_scroll_up)
         .on("mouseout", on_mouseout_scroll_up);
 
+
+    //selection.on("wheel", func) doesn't have access to wheel direction?
+    //$('#d3-plot')[0]
+    document.getElementById('d3-plot')
+        .addEventListener("wheel", on_wheel_plotchart, {passive:true});
+
+
     d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
     update_window_resize();
 }
 
 function update_window_resize() {
-    //don't do anything if plot not added yet
-    // if (!x_scale)
-    //     return;
-
     var plotRef = d3.select("#d3-plot");
+
+    //###something wonky is happening in the CSS. I'm reading the body correctly, the whole body just resizes itself awkwardly on window resize
     var svgRect = plotRef.node().getBoundingClientRect();
+    var grsdfjsdfjRect = document.getElementById('grsdfjsdfj').getBoundingClientRect();
     svgHeight = svgRect.height;
     svgWidth = svgRect.width;
+
+    //manually size theheader
+    var headerText = d3.select('#header-text-income');
+    headerText
+        .style('width', svgWidth-spaceOnLeft-headerPadPixels); //headerPadPixels accounts for size distortion from styling
+
+    //manually calculate the space for the bar chart (to fill screen minuts header) ###I'm sure there's a better way - investigate style: flex
+    var headerHeight = headerText.node().getBoundingClientRect().height;
+    svgHeight -= headerHeight;
+//    var plotHeight = svgHeight - headerHeight;
     var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
+
+    //svgHeight -= headerHeight;
+    //should just be 100% of remaining space ###
+    //##for some reason, reducing window size introduces a vert scrollbar? the whole body and #d3-plot div are all interpreted as larger than the window
+    plotRef.select('svg')
+        .attr('height', svgHeight);
+
     x_scale.range([0, plotWidth]);
     plotRef.selectAll(".plot-bar")
         .attr("width", function(d) { return x_scale(d[1]); });
@@ -288,6 +383,7 @@ function on_mouseout_scroll_up() {
         .attr("stroke", 'rgba(0,0,0,.2)');
 }
 
+//highlight plotbars on mouseover and highlight the corresponding zip on map. revert on mouseout
 function on_mouseover_plotbar() {
     var selectedThing = d3.select(this);
     selectedThing.style("fill", '#693');
@@ -296,7 +392,6 @@ function on_mouseover_plotbar() {
     var topLayer = leafletLayerMapping[zipId][activeOverlay];
     highlight_feature(topLayer);
 }
-
 function on_mouseout_plotbar() {
     var selectedThing = d3.select(this);
     selectedThing.style("fill", map_color(selectedThing.datum()[1]) );
@@ -306,6 +401,7 @@ function on_mouseout_plotbar() {
     reset_highlight(topLayer);
 }
 
+//clicking a plotbar selects the corresponding zip on map, zooms to it, and pops up some additional info
 function on_click_plotbar() {
     var selectedThing = d3.select(this);
     var zipId = selectedThing.datum()[0];
@@ -314,6 +410,12 @@ function on_click_plotbar() {
     zoom_to_feature(topLayer);
 }
 
+//mousewheel scrolls through plot data (changes the subset visible on screen)
+function on_wheel_plotchart(event) {
+    console.log(event.wheelDelta, event.wheelDeltaY, event.deltaY);
+    scroll_plot(Math.floor(-event.wheelDeltaY/100.0)*scrollStep);
+}
+ 
 
 //kinda moves an element to back, behind other elements at same level.
 //Just pushes the element to the top of the list of stuff in its parent element (they get drawn in order, later stuff covers earlier stuff)
