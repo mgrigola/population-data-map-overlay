@@ -1,0 +1,29 @@
+.pie-box {
+	padding: 4px 4px;
+	background-color: rgba(255, 255, 255, 0.33);
+	border-radius: 50px;
+}
+.pie-box span {
+	/*border: 1px solid #ccc;*/
+	font: 16px sans-serif;
+	text-align: center;
+	font-weight: bold;
+	display: inline-block;
+	width: 75%;
+}
+.pie-slice path{
+    fill: none;
+    stroke: rgba(0,0,0,.5);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.pie-label {
+	font: 12px sans-serif;
+	text-anchor: middle;
+}
+.pie-label-lower {
+	font: 12px sans-serif;
+	text-anchor: middle;
+	font-weight: 700;
+}

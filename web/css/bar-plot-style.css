@@ -1,0 +1,78 @@
+#d3-plot {
+    background-color: #333;
+    height: 100%;
+    width: 100%;
+}
+
+.plot-header {
+	background-color: rgba(108,0,0,.5);
+  font: 12px sans-serif;
+  font-weight: bold;
+  /* padding: 2px; */
+  /* box-shadow: 3px 0 5px rgba(0,255,0,0.8); */
+  /* flex: 0 0 auto; */
+  display: inline-block;
+  /* float: left; */
+}
+
+.plot-header span {
+  float: left;
+  padding: 2px;
+  vertical-align: center;
+  /* overflow: auto;
+  position: relative;
+  display: block; */
+
+  border-style: outset;
+  border-width: 2px;
+  border-color: #ccc;
+
+  background-color: #aaa;
+  /* font: 12px sans-serif; */
+  /* font-weight: bold;  */
+}
+#d3-plot .text-value {
+  fill: #fff;
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+#d3-plot .text-label {
+  fill: #ddd;
+  /* background-color: #ddd; */
+  color: #f00;
+  font: 11px Helvetica;
+  text-anchor: end;
+}
+/* why doesn't this work...?
+#d3-plot .text-label:hover {
+    background-color: yellow;
+    background-color: red;
+}
+*/
+.y-axis path, .y-axis line{
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+}
+/*.y-axis .domain{
+	fill: none;
+	stroke: #f00;
+	shape-rendering: crispEdges;
+}
+.tick line{
+	fill: none;
+	stroke: #0ff;
+	shape-rendering: crispEdges;
+}
+line.tick{
+	fill: none;
+	stroke: #f0f;
+	shape-rendering: crispEdges; 
+}*/
+.scroll-arrow {
+    fill: none;
+    /*stroke: rgba(0,0,0,.25);*/
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
