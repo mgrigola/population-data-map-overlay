@@ -45,6 +45,26 @@ function on_mouseup_header_income(e) {
         .attr("width", function(d) { return x_scale(d[1]); });
         //.attr('transform', plot_elem_transform);    
 }
+function on_mousedown_header_zip(e) {
+    d3.select(this).style('border-style', 'inset');
+}
+function on_mouseup_header_zip(e) {
+    d3.select(this).style('border-style', 'outset');
+
+    if (Math.abs(sortOption) == 2)
+        sortOption = 1;
+    else
+        sortOption = -sortOption;
+    
+    prepare_data();
+    var plotElems = d3.selectAll('.plot-elems');
+    plotElems.data(plotData);
+    
+    plotElems.transition().duration(500)
+        .attr("fill", function(d,i) { return map_color(d[1]); })
+        .attr("width", function(d) { return x_scale(d[1]); });
+        //.attr('transform', plot_elem_transform);    
+}
 
 function prepare_data() {
     if (sortOption == 2)
@@ -104,6 +124,8 @@ function add_d3_plot() {
         //.style('float', 'right')
         // .style('padding', '2px')
         // .style('vertical-align', 'center')
+        .on('mousedown', on_mousedown_header_zip)
+        .on('mouseup', on_mouseup_header_zip)
         .html('Zip');
     
     headerDiv.append('span')
