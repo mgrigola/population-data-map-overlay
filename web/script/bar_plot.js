@@ -24,16 +24,29 @@ var plotData, sortOption = -2;
 //var headerHeight = 22;  //not actua used at the moment
 var headerPadPixels = 8;  // = 2*[outset border] plus 2*[padding] (for each side)
 
+//so we don't actually sort the data, we just update the 3rd element/column which determines the displayed order
+//plotData stays in the order it was read from file. we (deep) copy it, sort the copy, and use the copy to update 3rd col in original
+function sort_data() {
+    //deepcopy plotData
+    var plotDataCopy = [];
+    for (var idx=0; idx<plotData.length; idx++) {
+        plotDataCopy.push([plotData[idx][0], plotData[idx][1], idx]);
+    }
 
-function prepare_data() {
+    //sort per current state of sortOption: 1=zip(key), 2=value, -=descending, +=ascending
     if (sortOption == 2)
-        plotData.sort(function(a, b) { return a[1]>b[1] ? 1 : -1; });  //sorts plotData by second col (income, asc)
+        plotDataCopy.sort(function(a, b) { return a[1]>b[1] ? 1 : -1; });  //sorts plotData by second col (income, asc)
     else if (sortOption == -2)
-        plotData.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotData by second col (income, desc)
+        plotDataCopy.sort(function(a, b) { return a[1]<b[1] ? 1 : -1; });  //sorts plotData by second col (income, desc)
     else if (sortOption == 1)
-        plotData.sort(function(a, b) { return a[0]>b[0] ? 1 : -1; });  //sorts plotData by first col (zip, desc)
+        plotDataCopy.sort(function(a, b) { return a[0]>b[0] ? 1 : -1; });  //sorts plotData by first col (zip, desc)
     else if (sortOption == -1)
-        plotData.sort(function(a, b) { return a[0]<b[0] ? 1 : -1; });  //sorts plotData by first col (zip, asc)
+        plotDataCopy.sort(function(a, b) { return a[0]<b[0] ? 1 : -1; });  //sorts plotData by first col (zip, asc)
+    
+    //now use mapping from plotDataCopy to set 3rd element in plotData to its new display position
+    for (var idx=0; idx<plotDataCopy.length; idx++) {
+        plotData[plotDataCopy[idx][2]][2] = idx;
+    }
 }
 
 
@@ -56,17 +69,17 @@ function add_d3_plot() {
 
     //assuming zipIncomeVals is already loaded...
     plotData = [];
+    var sortIdx = 0;
     for (var zipId in zipIncomeVals) {
         var intVal = +zipIncomeVals[zipId][keyToDisplay];
 	    if (isNaN(intVal))
-	        intVal = 0;
-        plotData.push([zipId, intVal]);
-        if (plotData.length > 200)
-            break;
+            intVal = 0;
+        plotData.push([zipId, intVal, sortIdx++]);
+        // if (plotData.length > 200)
+        //     break;
     }
     zipCount = plotData.length;
     maxPlotVal = Math.max.apply(Math, plotData.map(function(obj) {return obj[1];}));  //finds max val in second col of plotData (max income)
-    prepare_data();
 
     //var divRect = d3.select("#d3-plot").node().getBoundingClientRect();
     var divRect = document.getElementById('d3-plot').getBoundingClientRect();
@@ -164,7 +177,6 @@ function add_d3_plot() {
     y_scale = d3.scaleLinear().range([0, plotHeight]);  //.domain([plotHeight, 0])
     plotChart.append("g")
         .attr("class", "y-axis")
-        //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
         .call(
             d3.axisLeft(y_scale)
             .ticks(0) //zipCount-1 fuck these ticks //svgHeight/(barHeight+gapBetweenBars)
@@ -173,8 +185,11 @@ function add_d3_plot() {
             .tickFormat("")
         );
 
+    //once we've generated all the plot elements, we apply sort to set the 3rd piece of each datum to the row number that bar should be in
+    //after creating the elements in order read from file, but before the translate/transform (which is in the update_window_resize function)
+    sort_elems_and_update_display();
+
     //the arrows that allow scrolling through the plot:
-    //var arrowDataBot = [[0,0],[arrowWidth,arrowHeight],[2*arrowWidth,0]];
     var arrowDataBot = [[0,0],[arrowWidth-1,arrowHeight],[arrowWidth+1,arrowHeight],[2*arrowWidth,0]];
     var arrowDataTop = [[0,arrowHeight],[arrowWidth-1,0],[arrowWidth+1,0],[2*arrowWidth,arrowHeight]];  //can programmatically invert? having this duplicate irks me
     var lineFunction = d3.line()  //in v4, d3.svg.line -> d3.line and 'linear' -> d3.curveLinear
@@ -182,57 +197,47 @@ function add_d3_plot() {
         .y(function(d) { return d[1];})
         .curve(d3.curveLinear);
 
-    //bottom scroll arrow
+    //bottom scroll arrow/area
     var scrollOverlayBot = plotChart.append("g")
-        .attr("class", "scroll-area-bot")
-        //.attr("transform", translate_scroll_area_bot);
-    // the scroll arrow
+        .attr("class", "scroll-area-bot");
+    //the arrow
     scrollOverlayBot.append("path")
         .attr("d", lineFunction(arrowDataBot))
         .attr("class", 'scroll-arrow')
-        .attr("stroke", 'rgba(0,0,0,.2)')
-//        .style("stroke-linecap", 'round')
-//        .style("stroke-linejoin", 'round')
+        .attr("stroke", 'rgba(0,0,0,.2)');
     // the clickable rectangular area that actually triggers scrolling, slightly larger than arrow and transparent
     scrollOverlayBot.append("rect")
         .attr("width", 2*arrowWidth+2*arrowPad)
         .attr("height", arrowHeight+2*arrowPad+arrowEdgePad)
         .attr("fill", 'rgba(255,255,255,0.0)')  // == 'transparent'
-        //.attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad)+')')
         .on("click", function () { scroll_plot(scrollStep); } )
         .on("mouseover", on_mouseover_scroll_down)
-        .on("mouseout", on_mouseout_scroll_down)
-//        .on({"click": on_click_scroll_down, "mouseover": on_mouseover_scroll_down, "mouseout": on_mouseout_scroll_down}); //okay this syntax doesn't work with d3v4?
-
+        .on("mouseout", on_mouseout_scroll_down);
+    
+    //top scroll arrow/area
     var scrollOverlayTop = plotChart.append("g")
-        .attr("class", "scroll-area-top")
-        //.attr("transform", translate_scroll_area_top);
-    // the scroll arrow
+        .attr("class", "scroll-area-top");
+    //the arrow
     scrollOverlayTop.append("path")
         .attr("d", lineFunction(arrowDataTop))
         .attr("class", 'scroll-arrow')
-        .attr("stroke", 'rgba(0,0,0,.2)')
-//        .style("stroke-linecap", 'round')
-//        .style("stroke-linejoin", 'round')
+        .attr("stroke", 'rgba(0,0,0,.2)');
     // the clickable rectangular area that actually triggers scrolling, slightly larger than arrow and transparent
     scrollOverlayTop.append("rect")
         .attr("width", 2*arrowWidth+2*arrowPad)
         .attr("height", arrowHeight+2*arrowPad+arrowEdgePad)
         .attr("fill", 'rgba(255,255,255,0.0)')  // == 'transparent'
-        //.attr("transform", 'translate('+(-arrowPad)+','+(-arrowPad-arrowEdgePad)+')')
         .on("click", function () { scroll_plot(-scrollStep); } )
         .on("mouseover", on_mouseover_scroll_up)
         .on("mouseout", on_mouseout_scroll_up);
 
-
-    //selection.on("wheel", func) doesn't have access to wheel direction?
+    //d3.select('#d3-plot').on("wheel", func) doesn't have access to wheel direction?
     //$('#d3-plot')[0]
     document.getElementById('d3-plot')
         .addEventListener("wheel", on_wheel_plotchart, {passive:true});
 
-
     d3.select(window).on('resize.updatesvg', update_window_resize);  //function called on global window resize
-    update_window_resize();
+    update_window_resize();   //need to call resize to finish drawing stuff. we're kinda resizing from nothing
 }
 
 function update_window_resize() {
@@ -286,7 +291,7 @@ function update_window_resize() {
 
 
 function plot_elem_transform(datum, index) {
-    var yPos = (index-scrollRow)*(barHeight+gapBetweenBars) + spaceOnTop;// + 0.25*barHeight;
+    var yPos = (datum[2]-scrollRow)*(barHeight+gapBetweenBars) + spaceOnTop;// + 0.25*barHeight;
     return 'translate('+spaceOnLeft+','+yPos+')';  //"translate(${spaceOnLeft}, ${yPos})";  //spaceOnLeft
 }
 
@@ -401,44 +406,39 @@ function on_wheel_plotchart(event) {
 
 
 function on_mousedown_header_income(e) {
-    d3.select(this).style('border-style', 'inset');
+    d3.select(this).style('border-style', 'inset');  //do the Windows button press thing
 }
 function on_mouseup_header_income(e) {
-    d3.select(this).style('border-style', 'outset');
+    d3.select(this).style('border-style', 'outset');  //do the Windows button release thing
 
     if (Math.abs(sortOption) == 1)
         sortOption = -2;
     else
         sortOption = -sortOption;
     
-    prepare_data();
-    var plotElems = d3.selectAll('.plot-elems');
-    plotElems.data(plotData);
-    
-    plotElems.transition().duration(500)
-        .attr("fill", function(d,i) { return map_color(d[1]); })
-        .attr("width", function(d) { return x_scale(d[1]); })
-        .attr('transform', plot_elem_transform);    
+    sort_elems_and_update_display();    
 }
+
 function on_mousedown_header_zip(e) {
     d3.select(this).style('border-style', 'inset');
 }
 function on_mouseup_header_zip(e) {
-    d3.select(this).style('border-style', 'outset');
+    d3.select(this).style('border-style', 'outset');  
 
     if (Math.abs(sortOption) == 2)
         sortOption = 1;
     else
         sortOption = -sortOption;
     
-    prepare_data();
-    var plotElems = d3.selectAll('.plot-elems');
-    plotElems.data(plotData);
-    
-    plotElems.transition().duration(500)
-        .attr("fill", function(d,i) { return map_color(d[1]); })
-        .attr("width", function(d) { return x_scale(d[1]); })
-        .attr('transform', plot_elem_transform);    
+    sort_elems_and_update_display();
+}
+
+function sort_elems_and_update_display() {
+    sort_data();    
+    d3.selectAll('.plot-elems')
+        .data(plotData)
+        .transition().duration(1500)
+            .attr('transform', plot_elem_transform);
 }
 
 
