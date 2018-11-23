@@ -25,47 +25,6 @@ var plotData, sortOption = -2;
 var headerPadPixels = 8;  // = 2*[outset border] plus 2*[padding] (for each side)
 
 
-function on_mousedown_header_income(e) {
-    d3.select(this).style('border-style', 'inset');
-}
-function on_mouseup_header_income(e) {
-    d3.select(this).style('border-style', 'outset');
-
-    if (Math.abs(sortOption) == 1)
-        sortOption = -2;
-    else
-        sortOption = -sortOption;
-    
-    prepare_data();
-    var plotElems = d3.selectAll('.plot-elems');
-    plotElems.data(plotData);
-    
-    plotElems.transition().duration(500)
-        .attr("fill", function(d,i) { return map_color(d[1]); })
-        .attr("width", function(d) { return x_scale(d[1]); });
-        //.attr('transform', plot_elem_transform);    
-}
-function on_mousedown_header_zip(e) {
-    d3.select(this).style('border-style', 'inset');
-}
-function on_mouseup_header_zip(e) {
-    d3.select(this).style('border-style', 'outset');
-
-    if (Math.abs(sortOption) == 2)
-        sortOption = 1;
-    else
-        sortOption = -sortOption;
-    
-    prepare_data();
-    var plotElems = d3.selectAll('.plot-elems');
-    plotElems.data(plotData);
-    
-    plotElems.transition().duration(500)
-        .attr("fill", function(d,i) { return map_color(d[1]); })
-        .attr("width", function(d) { return x_scale(d[1]); });
-        //.attr('transform', plot_elem_transform);    
-}
-
 function prepare_data() {
     if (sortOption == 2)
         plotData.sort(function(a, b) { return a[1]>b[1] ? 1 : -1; });  //sorts plotData by second col (income, asc)
@@ -88,8 +47,9 @@ function add_d3_plot() {
 
     //div to contain the svg stuff that is the actual 'plot' (bars and numebrs and whatnot)
     var plotDiv = d3.select('#d3-plot').append('div')
-        .attr('height', '100%')
-        .attr('width', '100%');
+        .attr('class', 'plot-content')
+        // .attr('height', '100%')
+        // .attr('width', '100%');
     
     var plotChart = plotDiv.append('svg');
     //var plotChart = d3.select('#d3-plot').append('svg');
@@ -116,7 +76,6 @@ function add_d3_plot() {
     var plotHeight = zipCount*(barHeight + gapBetweenBars) - gapBetweenBars;  //probably runs way below page
     //var plotTotalHeight = zipCount*(barHeight + gapBetweenBars) - gapBetweenBars;  //probably runs way below page
 
-    var newPlotHeight = svgHeight- d3.select()
 
     headerDiv.append('span')
         //.style('border', '.5px solid #000')
@@ -155,10 +114,12 @@ function add_d3_plot() {
         //.style("height", '100%');
 
     //a group to contain all movable elements in the bar plot for resizing and scrolling
-    var plotBars = plotChart.selectAll("g")
+    var plotBars = plotChart.selectAll('g')
         .data(plotData)   //data here
-        .enter().append("g")
-            .attr("class", 'plot-elems')
+        .enter()
+            .append('g')
+            .attr('class', 'plot-elems')
+            .attr('transform', plot_elem_transform);
 
     //*_scale = a function that maps our data value in domain to pixels/position-on-screen value in range
     x_scale = d3.scaleLinear()
@@ -278,49 +239,48 @@ function update_window_resize() {
     var plotRef = d3.select("#d3-plot");
 
     //###something wonky is happening in the CSS. I'm reading the body correctly, the whole body just resizes itself awkwardly on window resize
-    var svgRect = plotRef.node().getBoundingClientRect();
-    var grsdfjsdfjRect = document.getElementById('grsdfjsdfj').getBoundingClientRect();
-    svgHeight = svgRect.height;
-    svgWidth = svgRect.width;
+    //var svgRect = plotRef.node().getBoundingClientRect();
+    //var grsdfjsdfjRect = document.getElementById('grsdfjsdfj').getBoundingClientRect();
+    //svgHeight = svgRect.height;
+    //svgWidth = svgRect.width;
+    
+    var headerText = d3.select('#header-text-income');
+    var headerHeight = headerText.node().getBoundingClientRect().height;
+    svgHeight = window.innerHeight - headerHeight - 4; //i think this -4 is from the margin:2 on the body?
+    svgWidth = window.innerWidth * 0.3;  //map-style.css sets map width to 70%, so this is 30%. so sloppy###
+    var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
 
     //manually size theheader
-    var headerText = d3.select('#header-text-income');
     headerText
         .style('width', svgWidth-spaceOnLeft-headerPadPixels); //headerPadPixels accounts for size distortion from styling
 
-    //manually calculate the space for the bar chart (to fill screen minuts header) ###I'm sure there's a better way - investigate style: flex
-    var headerHeight = headerText.node().getBoundingClientRect().height;
-    svgHeight -= headerHeight;
-//    var plotHeight = svgHeight - headerHeight;
-    var plotWidth = svgWidth - spaceOnLeft - spaceOnRight;
-
-    //svgHeight -= headerHeight;
-    //should just be 100% of remaining space ###
-    //##for some reason, reducing window size introduces a vert scrollbar? the whole body and #d3-plot div are all interpreted as larger than the window
     plotRef.select('svg')
+        .attr('width', svgWidth)
         .attr('height', svgHeight);
 
+    //resize plotbars to new width and move text inside bar back to inside edge of bar
     x_scale.range([0, plotWidth]);
     plotRef.selectAll(".plot-bar")
         .attr("width", function(d) { return x_scale(d[1]); });
-        
     plotRef.selectAll(".text-value")
         .attr("x", text_values_attr_x);
 
-    plotRef.selectAll(".plot-elems")
-    //plotRef.selectAll("g")
-        .attr("transform", plot_elem_transform);
-    //.attr("transform", 'translate('+spaceOnLeft+','+gapBetweenBars+')')
+    //translate all the bars to correct row. Maybe could just be in initialization...
+    // plotRef.selectAll(".plot-elems")
+    //     .attr("transform", plot_elem_transform);
 
+    //move the arrow buttons to top/bottom of svg space and recenter
     plotRef.select(".scroll-area-bot")
         .attr("transform", translate_scroll_area_bot);
     plotRef.select(".scroll-area-top")
         .attr("transform", translate_scroll_area_top);
 
+    //y-axis doesn;t necesasrily need to resize on window resize, but seems reasonable to match new window size
     //y_scale = d3.scaleLinear().range([0, plotHeight]);
     plotRef.selectAll(".y-axis")
         .attr("transform", 'translate('+spaceOnLeft+','+spaceOnTop+')');
     
+    //calculate max starting row/bar such that the last bar is at the bottom of the window: depends on how many bars are visible at once
     maxScrollRow = zipCount - Math.floor(svgHeight/(barHeight+gapBetweenBars));
 }
 
@@ -438,6 +398,49 @@ function on_wheel_plotchart(event) {
     scroll_plot(Math.floor(-event.wheelDeltaY/100.0)*scrollStep);
 }
  
+
+
+function on_mousedown_header_income(e) {
+    d3.select(this).style('border-style', 'inset');
+}
+function on_mouseup_header_income(e) {
+    d3.select(this).style('border-style', 'outset');
+
+    if (Math.abs(sortOption) == 1)
+        sortOption = -2;
+    else
+        sortOption = -sortOption;
+    
+    prepare_data();
+    var plotElems = d3.selectAll('.plot-elems');
+    plotElems.data(plotData);
+    
+    plotElems.transition().duration(500)
+        .attr("fill", function(d,i) { return map_color(d[1]); })
+        .attr("width", function(d) { return x_scale(d[1]); })
+        .attr('transform', plot_elem_transform);    
+}
+function on_mousedown_header_zip(e) {
+    d3.select(this).style('border-style', 'inset');
+}
+function on_mouseup_header_zip(e) {
+    d3.select(this).style('border-style', 'outset');
+
+    if (Math.abs(sortOption) == 2)
+        sortOption = 1;
+    else
+        sortOption = -sortOption;
+    
+    prepare_data();
+    var plotElems = d3.selectAll('.plot-elems');
+    plotElems.data(plotData);
+    
+    plotElems.transition().duration(500)
+        .attr("fill", function(d,i) { return map_color(d[1]); })
+        .attr("width", function(d) { return x_scale(d[1]); })
+        .attr('transform', plot_elem_transform);    
+}
+
 
 //kinda moves an element to back, behind other elements at same level.
 //Just pushes the element to the top of the list of stuff in its parent element (they get drawn in order, later stuff covers earlier stuff)

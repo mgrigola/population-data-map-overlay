@@ -11,14 +11,17 @@
   /* padding: 2px; */
   /* box-shadow: 3px 0 5px rgba(0,255,0,0.8); */
   /* flex: 0 0 auto; */
-  display: inline-block;
+  /* display: inline-block; */
   /* float: left; */
+  width: 100%;
+  cursor: pointer;  /* little index finger poking cursor */
 }
 
 .plot-header span {
   float: left;
   padding: 2px;
   vertical-align: center;
+  user-select: none;
   /* overflow: auto;
   position: relative;
   display: block; */
