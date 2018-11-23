@@ -1,0 +1,42 @@
+#leaflet-map {
+	width: 70%;
+	height: 100%;
+}
+.my-div-icon {
+    fill: #090;
+    font: 12px sans-serif;
+	color: #555;
+}
+.info {
+	padding: 0px 0px;
+	font: 14px sans-serif;
+	background: white;
+	background: rgba(255,255,255,0.8);
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+	border-radius: 5px;
+}
+.info h4 {
+	margin: 0 0 16px;
+	color: #555;
+}
+.legend {
+	text-align: left;
+	line-height: 18px;
+	color: #333;
+	width: 112px;
+	padding: 2px;
+}
+.legend legli {
+	width: 24px;
+	height: 16px;
+	float: left;
+	margin-right: 4px;
+	opacity: 0.5;
+}
+.legend leghd {
+	display: inline-block;
+	font: 14px;
+	font-weight: bold;
+	color: #000;
+	text-align: center;
+}
